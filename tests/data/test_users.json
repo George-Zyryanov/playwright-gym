@@ -1,0 +1,51 @@
+{
+  "valid_users": {
+    "standard": {
+      "email": "standard_user@example.com",
+      "password": "Password123!",
+      "first_name": "John",
+      "last_name": "Doe"
+    },
+    "admin": {
+      "email": "admin_user@example.com",
+      "password": "Admin123!",
+      "first_name": "Admin",
+      "last_name": "User"
+    },
+    "premium": {
+      "email": "premium_user@example.com",
+      "password": "Premium123!",
+      "first_name": "Jane",
+      "last_name": "Smith"
+    }
+  },
+  "invalid_users": {
+    "wrong_password": {
+      "email": "valid@example.com",
+      "password": "wrong_password"
+    },
+    "nonexistent": {
+      "email": "nonexistent@example.com",
+      "password": "Password123!"
+    },
+    "locked_out": {
+      "email": "locked_out@example.com",
+      "password": "Password123!"
+    }
+  },
+  "form_data": {
+    "registration": {
+      "first_name": "New",
+      "last_name": "User",
+      "email": "new_user@example.com",
+      "password": "NewUser123!",
+      "confirm_password": "NewUser123!",
+      "phone": "1234567890",
+      "address": "123 Main St",
+      "city": "Anytown",
+      "state": "CA",
+      "zip": "12345",
+      "country": "USA"
+    }
+  }
+} 

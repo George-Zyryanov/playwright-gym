@@ -1,0 +1,12 @@
+{
+  "TC-LOGIN-001": {
+    "description": "Verify login page loads successfully",
+    "priority": "Critical",
+    "requirement": "REQ-001"
+  },
+  "TC-LOGIN-002": {
+    "description": "Verify user can login with valid credentials",
+    "priority": "Blocker",
+    "requirement": "REQ-001"
+  }
+} 

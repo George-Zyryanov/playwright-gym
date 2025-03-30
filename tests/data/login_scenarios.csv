@@ -1,0 +1,9 @@
+email,password,expected_result,error_message
+standard_user@example.com,Password123!,success,
+admin_user@example.com,Admin123!,success,
+valid@example.com,wrong_password,failure,Invalid email or password
+nonexistent@example.com,Password123!,failure,User does not exist
+,Password123!,failure,Email is required
+standard_user@example.com,,failure,Password is required
+invalid-email-format,Password123!,failure,Invalid email format
+standard_user@example.com,short,failure,Password is too short 

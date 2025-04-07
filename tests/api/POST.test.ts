@@ -3,7 +3,7 @@ import { test } from '@playwright/test';
 
 const apiActions = new APIActions();
 
-test(`postUsers`, { tag: '@API'}, async ({ request }) => {
+test(`postUsers`, { tag: ''}, async ({ request }) => {
 
     //* Body Response Params and Body Response Headers are stored in single text file separated by #
     const requestBody = JSON.parse((await apiActions.readValuesFromTextFile('postUsers')).split(`#`)[0]);

@@ -1,0 +1,2 @@
+responseCode|products|id|name|price|brand|category|usertype|category|Rs.|Women|Men|Kids|Tops|Tshirts|Dress|Jeans|Saree#
+Date, Content-Type, Transfer-Encoding, Connection, Vary, Referrer-Policy, X-Frame-Options, X-Content-Type-Options, Allow, X-Powered-By, cf-cache-status, Status, Report-To, NEL, Server, CF-RAY, Content-Encoding, alt-svc, server-timing

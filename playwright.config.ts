@@ -14,7 +14,7 @@ const reportConfig: OrtoniReportConfig = {
   title: "Playwright Framework with Typescript",
   showProject: true,
   filename: "OrtoniHtmlReport",
-  authorName: "Akshay Pai",
+  authorName: "George Zyryanov",
   preferredTheme: "dark",
   folderPath: "html-report",
   projectName: "Playwright Framework with Typescript",
@@ -64,7 +64,8 @@ const config: PlaywrightTestConfig = {
 
         //Slows down execution by ms
         launchOptions: {
-          slowMo: 0
+          slowMo: 0,
+          args: ['--headless=new']
         }
       },
     },

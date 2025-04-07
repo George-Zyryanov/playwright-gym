@@ -4,6 +4,8 @@ import { ElementsPage } from '@pages/ElementsPage';
 import { AlertsFrameWindowsPage } from '@pages/AlertsFrameWindowsPage';
 import { WidgetsPage } from '@pages/WidgetsPage';
 import { InteractionsPage } from '@pages/InteractionsPage';
+import { MainPage } from '@pages/MainPage'
+import { ProductsPage} from '@pages/ProductsPage'
 import { WebActions } from '@lib/WebActions';
 import AxeBuilder from '@axe-core/playwright';
 
@@ -14,6 +16,8 @@ const test = baseTest.extend<{
     alertsFrameWindowsPage: AlertsFrameWindowsPage;
     widgetsPage: WidgetsPage;
     interactionsPage: InteractionsPage;
+    productsPage: ProductsPage;
+    mainPage: MainPage;
     makeAxeBuilder: AxeBuilder;
     testInfo: TestInfo;
 }>({
@@ -34,6 +38,12 @@ const test = baseTest.extend<{
     },
     interactionsPage: async ({ page, context }, use) => {
         await use(new InteractionsPage(page, context));
+    },
+    mainPage: async ({page, context}, use) => {
+        await use(new MainPage(page, context));
+    },
+    productsPage: async({page, context}, use) => {
+        await use(new ProductsPage(page, context));
     },
     makeAxeBuilder: async ({ page }, use) => {
         await use(new AxeBuilder({ page })

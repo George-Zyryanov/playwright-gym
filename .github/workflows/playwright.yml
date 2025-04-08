@@ -112,34 +112,57 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: html-report
-          path: downloaded-artifact
+          path: html-report.zip
 
       - name: Extract HTML report
         run: |
           echo "Listing downloaded artifacts:"
-          ls -la html-report.zip
+          ls -la
           mkdir -p temp-extract
           
-          # Extract the artifact to a temporary location
-          unzip -o html-report.zip -d temp-extract
+          # Find and extract any zip files we have
+          echo "Looking for zip files to extract:"
+          find . -maxdepth 1 -name "*.zip" -type f -o -name "html-report.zip" -type d
+          
+          if [ -f "html-report.zip" ]; then
+            echo "Found html-report.zip file"
+            unzip -o html-report.zip -d temp-extract
+          elif [ -d "html-report.zip" ]; then
+            echo "Found html-report.zip directory"
+            find html-report.zip -name "*.zip" -type f -exec unzip -o {} -d temp-extract \;
+          else
+            echo "No html-report.zip found, looking for any zip files"
+            find . -name "*.zip" -type f -exec unzip -o {} -d temp-extract \;
+          fi
           
           echo "Temporary extraction contents:"
-          ls -la temp-extract
+          ls -la temp-extract || echo "temp-extract directory is empty or doesn't exist"
           
           # Create the html-report directory
           mkdir -p html-report
           
-          # Handle nested html-report directory if it exists
+          # Handle nested directory structures
           if [ -d "temp-extract/html-report" ]; then
             echo "Found nested html-report directory"
-            cp -r temp-extract/html-report/* html-report/
+            cp -r temp-extract/html-report/* html-report/ || echo "Failed to copy from temp-extract/html-report"
+          elif find temp-extract -name "index.html" | grep -q .; then
+            echo "Found index.html in a subdirectory"
+            INDEX_DIR=$(find temp-extract -name "index.html" | head -1 | xargs dirname)
+            echo "Copying from $INDEX_DIR to html-report/"
+            cp -r "$INDEX_DIR"/* html-report/ || echo "Failed to copy from $INDEX_DIR"
           else
-            echo "No nested directory, copying directly"
-            cp -r temp-extract/* html-report/
+            echo "No nested directory or index.html found, copying all contents"
+            cp -r temp-extract/* html-report/ || echo "Failed to copy from temp-extract"
           fi
           
           echo "Final html-report contents:"
-          ls -la html-report
+          ls -la html-report || echo "html-report directory is empty or doesn't exist"
+          
+          # Create a fallback index.html if needed
+          if [ ! -f "html-report/index.html" ]; then
+            echo "No index.html found, creating a simple one"
+            echo "<html><body><h1>Playwright Test Report</h1><p>Run #${{ github.run_number }}</p></body></html>" > html-report/index.html
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v4

@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+    outputs:
+      build_status: ${{ job.status }}
 
     # Define the steps to execute in this job
     steps:
@@ -188,12 +190,23 @@ jobs:
           from datetime import datetime
           from jinja2 import Template
           import glob
-          
+
           # Get commit info
           commit_sha = \"${{ github.sha }}\"
           commit_message = \"${{ github.event.head_commit.message }}\"
           run_number = ${{ github.run_number }}
           run_id = \"${{ github.run_id }}\"
+          # Get build job status - convert to lowercase for consistency
+          build_status = \"${{ needs.build.outputs.build_status }}\".lower()
+
+          # Map GitHub Actions status to our status values
+          status_map = {
+              "success": "success",
+              "failure": "failure",
+              "cancelled": "unknown",
+              "skipped": "unknown"
+          }
+          status = status_map.get(build_status, "unknown")
           
           # Create directory for this run
           report_dir = f'reports/{commit_sha}'
@@ -222,7 +235,8 @@ jobs:
               'run_number': run_number,
               'run_id': run_id,
               'timestamp': datetime.now().isoformat(),
-              'url': f'reports/{commit_sha}/index.html'
+              'url': f'reports/{commit_sha}/index.html',
+              'status': status
           }
           
           # Load existing reports or create new list
@@ -234,8 +248,19 @@ jobs:
               except json.JSONDecodeError:
                   reports = []
           
-          # Add new report to the beginning
-          reports.insert(0, report_data)
+          # Check if the current commit is already in reports
+          existing_index = None
+          for i, report in enumerate(reports):
+              if report.get('sha') == commit_sha:
+                  existing_index = i
+                  break
+          
+          if existing_index is not None:
+              # Update existing report
+              reports[existing_index] = report_data
+          else:
+              # Add new report to the beginning
+              reports.insert(0, report_data)
           
           # Keep only last 10 reports
           reports = reports[:10]
@@ -244,7 +269,16 @@ jobs:
           with open('reports.json', 'w') as f:
               json.dump(reports, f, indent=2)
           
-          # Generate index.html with links to all reports
+          # Keep only the reports directories mentioned in reports.json
+          kept_shas = [report['sha'] for report in reports]
+          all_report_dirs = glob.glob('reports/*')
+          for dir_path in all_report_dirs:
+              dir_name = os.path.basename(dir_path)
+              if dir_name not in kept_shas and not dir_name.startswith('.'):
+                  print(f'Removing old report directory: {dir_path}')
+                  shutil.rmtree(dir_path)
+          
+          # Generate index.html with links to all reports and status indicators
           template = Template('''
           <!DOCTYPE html>
           <html>
@@ -252,18 +286,31 @@ jobs:
               <title>Playwright Test Reports</title>
               <style>
                   body { font-family: Arial, sans-serif; margin: 40px; }
-                  .report { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                  .report { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; position: relative; }
                   .commit-message { color: #666; }
                   .timestamp { color: #888; font-size: 0.9em; }
                   a { color: #0366d6; text-decoration: none; }
                   a:hover { text-decoration: underline; }
+                  .status-indicator {
+                      display: inline-block;
+                      width: 12px;
+                      height: 12px;
+                      border-radius: 50%;
+                      margin-right: 8px;
+                  }
+                  .status-success { background-color: #28a745; }
+                  .status-failure { background-color: #dc3545; }
+                  .status-unknown { background-color: #6c757d; }
               </style>
           </head>
           <body>
               <h1>Playwright Test Reports</h1>
               {% for report in reports %}
               <div class='report'>
-                  <h2><a href='{{ report.url }}'>Run #{{ report.run_number }}</a></h2>
+                  <h2>
+                      <span class='status-indicator status-{% if report.status == 'success' %}success{% elif report.status == 'failure' %}failure{% else %}unknown{% endif %}'></span>
+                      <a href='{{ report.url }}'>Run #{{ report.run_number }}</a>
+                  </h2>
                   <div class='commit-message'>{{ report.message }}</div>
                   <div class='timestamp'>{{ report.timestamp }}</div>
                   <div>Commit: {{ report.sha[:7] }}</div>

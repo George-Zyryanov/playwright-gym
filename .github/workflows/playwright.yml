@@ -20,9 +20,18 @@ jobs:
       SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
     outputs:
       build_status: ${{ job.status }}
+      build_start_time: ${{ steps.build_timing.outputs.start_time }}
+      build_end_time: ${{ steps.build_timing_end.outputs.end_time }}
+      build_duration: ${{ steps.build_timing_end.outputs.duration_seconds }}
 
     # Define the steps to execute in this job
     steps:
+      # Step to record start time
+      - name: Record build timing
+        id: build_timing
+        run: |
+          echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+          
       # Step to checkout the source code from the repository
       - name: Checkout code
         uses: actions/checkout@v4
@@ -105,6 +114,18 @@ jobs:
         id: artifact_link
         run: echo "artifact_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
         if: always()
+
+      # Record build end time and calculate duration
+      - name: Calculate build duration
+        id: build_timing_end
+        if: always()
+        run: |
+          END_TIME=$(date +%s)
+          START_TIME=${{ steps.build_timing.outputs.start_time }}
+          DURATION=$((END_TIME - START_TIME))
+          echo "end_time=$END_TIME" >> $GITHUB_OUTPUT
+          echo "duration_seconds=$DURATION" >> $GITHUB_OUTPUT
+          echo "Build duration: $DURATION seconds"
 
       # Send Slack notification with html-report url once the tests are completed
       - name: Send Slack notification
@@ -230,10 +251,15 @@ jobs:
           # Make the script executable
           chmod +x .github/scripts/generate_reports.py
           
-          # Calculate build duration - using a fixed value for now
-          # In the future, we can implement a more reliable calculation method
-          BUILD_DURATION="180"
-          echo "Using build duration: $BUILD_DURATION seconds (3 minutes)"
+          # Get the actual build duration from the build job
+          BUILD_DURATION="${{ needs.build.outputs.build_duration }}"
+          if [[ -z "$BUILD_DURATION" || "$BUILD_DURATION" == "null" ]]; then
+            # Fallback to a default value if the actual duration is not available
+            BUILD_DURATION="180"
+            echo "No build duration available, using default: $BUILD_DURATION seconds"
+          else
+            echo "Using actual build duration: $BUILD_DURATION seconds"
+          fi
           
           # Run the script with environment variables
           export GITHUB_SHA="${{ github.sha }}"

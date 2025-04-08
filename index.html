@@ -1,1 +1,41 @@
-# Test Reports
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playwright Test Reports</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .report { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; position: relative; }
+        .commit-message { color: #666; margin-bottom: 10px; }
+        .timestamp { color: #888; font-size: 0.9em; margin-bottom: 5px; }
+        a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-failure { background-color: #dc3545; }
+        .status-unknown { background-color: #6c757d; }
+        h1 { margin-bottom: 30px; }
+        h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>Playwright Test Reports</h1>
+    
+    <div class='report'>
+        <h2>
+            <span class='status-indicator status-success'></span>
+            <a href='reports/fc3378c748bd790d18f46860f6dd245c05af7eca/index.html'>Run #17</a>
+        </h2>
+        <div class='commit-message'>Update GitHub Actions workflow: change permissions for contents to write, specify GitHub token for checkout, and reintroduce Git configuration for user details during commit to ensure proper attribution in gh-pages updates.</div>
+        <div class='timestamp'>2025-04-08T09:39:54.060026</div>
+        <div>Commit: fc3378c</div>
+    </div>
+    
+</body>
+</html>

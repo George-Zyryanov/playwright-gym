@@ -99,6 +99,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -131,10 +135,10 @@ jobs:
           from jinja2 import Template
 
           # Get commit info
-          commit_sha = '${{ github.sha }}'
-          commit_message = '${{ github.event.head_commit.message }}'
+          commit_sha = \"${{ github.sha }}\"
+          commit_message = \"${{ github.event.head_commit.message }}\"
           run_number = ${{ github.run_number }}
-          run_id = '${{ github.run_id }}'
+          run_id = \"${{ github.run_id }}\"
           
           # Create directory for this run
           os.makedirs(f'reports/{commit_sha}', exist_ok=True)

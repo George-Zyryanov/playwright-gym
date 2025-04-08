@@ -32,6 +32,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          
+      # Setup browser cache
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            /home/runner/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       # Step to install Node.js dependencies
       - name: Install dependencies
@@ -39,7 +50,15 @@ jobs:
 
       # Step to install Chrome browser for Playwright
       - name: Install Chrome browser for Playwright
-        run: npx playwright install chrome
+        run: |
+          # Check if browser is already in cache
+          if [ -d ~/.cache/ms-playwright ] && [ -n "$(ls -A ~/.cache/ms-playwright)" ]; then
+            echo "Using cached browser installation"
+            npx playwright install-deps chrome
+          else
+            echo "Installing browser from scratch"
+            npx playwright install chrome
+          fi
 
       # Step to run tests with qa as environment variable similarly we can define qa|dev|qaApi|devApi
       - name: Run tests
@@ -196,17 +215,18 @@ jobs:
           commit_message = \"${{ github.event.head_commit.message }}\"
           run_number = ${{ github.run_number }}
           run_id = \"${{ github.run_id }}\"
+          
           # Get build job status - convert to lowercase for consistency
           build_status = \"${{ needs.build.outputs.build_status }}\".lower()
 
           # Map GitHub Actions status to our status values
-          status_map = {
-              "success": "success",
-              "failure": "failure",
-              "cancelled": "unknown",
-              "skipped": "unknown"
-          }
-          status = status_map.get(build_status, "unknown")
+          status_map = {}
+          status_map['success'] = 'success'
+          status_map['failure'] = 'failure'
+          status_map['cancelled'] = 'unknown'
+          status_map['skipped'] = 'unknown'
+          
+          status = status_map.get(build_status, 'unknown')
           
           # Create directory for this run
           report_dir = f'reports/{commit_sha}'

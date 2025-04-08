@@ -23,6 +23,11 @@ export class MainPage {
 
     async navigateToURL(): Promise<void> {
         await this.page.goto("/");
-        await this.dialogWindowConsentButton.click()
+        try {
+            await this.dialogWindowConsentButton.click()
+
+        } catch (Error) {
+            console.log("The modal window was not present. Error --> ",Error);
+        }
     }
 }

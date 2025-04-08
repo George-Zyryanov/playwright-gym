@@ -112,7 +112,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: html-report
-          path: html-report
+          path: html-report.zip
+
+      - name: Extract HTML report
+        run: |
+          mkdir -p html-report
+          unzip -o html-report.zip/html-report.zip -d html-report || unzip -o html-report.zip -d html-report
+          ls -la html-report
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -136,6 +142,7 @@ jobs:
           import json
           from datetime import datetime
           from jinja2 import Template
+          import glob
 
           # Get commit info
           commit_sha = \"${{ github.sha }}\"
@@ -146,7 +153,7 @@ jobs:
           # Create directory for this run
           os.makedirs(f'reports/{commit_sha}', exist_ok=True)
           
-          # Move report to versioned directory
+          # Move report files to versioned directory
           os.system('cp -r html-report/* reports/' + commit_sha + '/')
           
           # Create or update reports.json
@@ -159,10 +166,14 @@ jobs:
               'url': f'reports/{commit_sha}/index.html'
           }
           
+          # Load existing reports or create new list
           reports = []
           if os.path.exists('reports.json'):
-              with open('reports.json', 'r') as f:
-                  reports = json.load(f)
+              try:
+                  with open('reports.json', 'r') as f:
+                      reports = json.load(f)
+              except json.JSONDecodeError:
+                  reports = []
           
           # Add new report to the beginning
           reports.insert(0, report_data)
@@ -170,10 +181,20 @@ jobs:
           # Keep only last 10 reports
           reports = reports[:10]
           
+          # Save updated reports.json
           with open('reports.json', 'w') as f:
               json.dump(reports, f, indent=2)
           
-          # Generate index.html
+          # Find all report directories
+          report_dirs = glob.glob('reports/*')
+          # Keep only the 10 most recent ones (if there are more)
+          if len(report_dirs) > 10:
+              report_dirs.sort(key=os.path.getmtime, reverse=True)
+              for old_dir in report_dirs[10:]:
+                  print(f'Removing old report directory: {old_dir}')
+                  os.system(f'rm -rf {old_dir}')
+          
+          # Generate index.html with links to all reports
           template = Template('''
           <!DOCTYPE html>
           <html>
@@ -205,6 +226,20 @@ jobs:
           with open('index.html', 'w') as f:
               f.write(template.render(reports=reports))
           "
+          
+      # Verify directory structure before upload
+      - name: Verify directory structure
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          echo "Reports directory structure:"
+          ls -la reports/ || echo "No reports directory found"
+          if [ -d "reports" ]; then
+            for dir in reports/*/; do
+              echo "Contents of $dir:"
+              ls -la "$dir" | head -n 10
+            done
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -581,7 +581,11 @@ def main():
     ''')
     
     try:
-        rendered_html = template.render(reports=reports, now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        rendered_html = template.render(
+            reports=reports, 
+            now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            parse_duration_to_seconds=parse_duration_to_seconds
+        )
         with open('index.html', 'w') as f:
             f.write(rendered_html)
         print("Generated index.html successfully")

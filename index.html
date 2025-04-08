@@ -7,6 +7,80 @@
         <title>Playwright Test Reports</title>
         <style>
             body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
+            
+            /* Visual History Grid Styles */
+            .history-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 40px;
+                max-width: 900px;
+                margin: 0 auto 40px;
+            }
+            
+            .history-square {
+                aspect-ratio: 1;
+                border-radius: 8px;
+                cursor: pointer;
+                position: relative;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                overflow: hidden;
+            }
+            
+            .history-square:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10;
+            }
+            
+            .history-square.success {
+                background-color: #28a745;
+            }
+            
+            .history-square.failure {
+                background-color: #dc3545;
+            }
+            
+            .history-square.unknown {
+                background-color: #6c757d;
+            }
+            
+            .history-tooltip {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px;
+                transform: translateY(100%);
+                transition: transform 0.2s ease;
+                font-size: 0.8em;
+                line-height: 1.4;
+            }
+            
+            .history-square:hover .history-tooltip {
+                transform: translateY(0);
+            }
+            
+            .history-tooltip .run-number {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            
+            .history-tooltip .commit-sha {
+                font-family: monospace;
+                font-size: 0.9em;
+                opacity: 0.8;
+            }
+            
+            .history-tooltip .timestamp {
+                font-size: 0.8em;
+                opacity: 0.7;
+            }
+            
+            /* Existing styles */
             .report { 
                 margin: 20px 0; 
                 padding: 20px; 
@@ -62,7 +136,91 @@
     </head>
     <body>
         <div class="container">
-            <h1>Playwright Test Reports <span class="report-count">(2 reports)</span></h1>
+            <h1>Playwright Test Reports <span class="report-count">(3 reports)</span></h1>
+            
+            <!-- Visual History Grid -->
+            <div class="history-grid">
+                
+                <a href="reports/fdda337f1113e42194603c49a7bd6f045dc8f4ac/index.html" class="history-square success">
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #20</div>
+                        <div class="commit-sha">fdda337</div>
+                        <div class="timestamp">2025-04-08</div>
+                    </div>
+                </a>
+                
+                <a href="reports/0eb3fd52cdd842ad2387ed20ea7f31eba00bd946/index.html" class="history-square success">
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #19</div>
+                        <div class="commit-sha">0eb3fd5</div>
+                        <div class="timestamp">2025-04-08</div>
+                    </div>
+                </a>
+                
+                <a href="reports/fc3378c748bd790d18f46860f6dd245c05af7eca/index.html" class="history-square success">
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #17</div>
+                        <div class="commit-sha">fc3378c</div>
+                        <div class="timestamp">2025-04-08</div>
+                    </div>
+                </a>
+                
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Existing Reports List -->
+            
+            <div class='report'>
+                <h2>
+                    <span class='status-indicator status-success'></span>
+                    <a href='reports/fdda337f1113e42194603c49a7bd6f045dc8f4ac/index.html'>Run #20</a>
+                </h2>
+                <div class='commit-message'>Enhance report generation script: add visual history grid to HTML reports, improving the display of test results with interactive elements for better user experience. Include status indicators for each report and placeholders for missing data.</div>
+                <div class='timestamp'>2025-04-08T09:55:43.070028</div>
+                <div>Commit: fdda337</div>
+            </div>
             
             <div class='report'>
                 <h2>
@@ -85,7 +243,7 @@
             </div>
             
             <footer>
-                Generated by GitHub Actions on 2025-04-08 09:49:37
+                Generated by GitHub Actions on 2025-04-08 09:55:43
             </footer>
         </div>
     </body>

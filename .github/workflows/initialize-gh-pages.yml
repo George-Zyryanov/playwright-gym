@@ -1,0 +1,26 @@
+name: Initialize gh-pages branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  initialize-gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create gh-pages branch
+        run: |
+          git checkout --orphan gh-pages
+          git rm -rf .
+          echo "# Test Reports" > index.html
+          git add index.html
+          git commit -m "Initialize gh-pages branch"
+          git push origin gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

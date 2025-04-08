@@ -93,3 +93,115 @@ jobs:
           SLACK_USERNAME: Playwright GitHub Actions
           SLACK_MESSAGE: "Test results are available in [Artifacts section](${{ steps.artifact_link.outputs.artifact_url }}) as html-report."
         if: always()
+
+  # Updated job for deploying to GitHub Pages with versioning
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-report
+          path: html-report
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install jinja2
+
+      - name: Generate index page
+        run: |
+          python -c "
+          import os
+          import json
+          from datetime import datetime
+          from jinja2 import Template
+
+          # Get commit info
+          commit_sha = '${{ github.sha }}'
+          commit_message = '${{ github.event.head_commit.message }}'
+          run_number = ${{ github.run_number }}
+          run_id = '${{ github.run_id }}'
+          
+          # Create directory for this run
+          os.makedirs(f'reports/{commit_sha}', exist_ok=True)
+          
+          # Move report to versioned directory
+          os.system('cp -r html-report/* reports/' + commit_sha + '/')
+          
+          # Create or update reports.json
+          report_data = {
+              'sha': commit_sha,
+              'message': commit_message,
+              'run_number': run_number,
+              'run_id': run_id,
+              'timestamp': datetime.now().isoformat(),
+              'url': f'reports/{commit_sha}/index.html'
+          }
+          
+          reports = []
+          if os.path.exists('reports.json'):
+              with open('reports.json', 'r') as f:
+                  reports = json.load(f)
+          
+          # Add new report to the beginning
+          reports.insert(0, report_data)
+          
+          # Keep only last 10 reports
+          reports = reports[:10]
+          
+          with open('reports.json', 'w') as f:
+              json.dump(reports, f, indent=2)
+          
+          # Generate index.html
+          template = Template('''
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Playwright Test Reports</title>
+              <style>
+                  body { font-family: Arial, sans-serif; margin: 40px; }
+                  .report { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                  .commit-message { color: #666; }
+                  .timestamp { color: #888; font-size: 0.9em; }
+                  a { color: #0366d6; text-decoration: none; }
+                  a:hover { text-decoration: underline; }
+              </style>
+          </head>
+          <body>
+              <h1>Playwright Test Reports</h1>
+              {% for report in reports %}
+              <div class='report'>
+                  <h2><a href='{{ report.url }}'>Run #{{ report.run_number }}</a></h2>
+                  <div class='commit-message'>{{ report.message }}</div>
+                  <div class='timestamp'>{{ report.timestamp }}</div>
+                  <div>Commit: {{ report.sha[:7] }}</div>
+              </div>
+              {% endfor %}
+          </body>
+          </html>
+          ''')
+          
+          with open('index.html', 'w') as f:
+              f.write(template.render(reports=reports))
+          "
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          force_orphan: false

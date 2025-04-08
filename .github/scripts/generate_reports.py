@@ -25,6 +25,27 @@ from jinja2 import Template
 import glob
 import sys
 
+def parse_duration_to_seconds(duration_str):
+    """Convert a duration string in format HH:MM:SS to seconds."""
+    if not duration_str or duration_str == "Unknown":
+        return 0
+    
+    try:
+        parts = duration_str.split(':')
+        if len(parts) == 3:
+            # HH:MM:SS format
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+        elif len(parts) == 2:
+            # MM:SS format
+            return int(parts[0]) * 60 + int(parts[1])
+        elif len(parts) == 1:
+            # SS format
+            return int(parts[0])
+        return 0
+    except (ValueError, IndexError):
+        print(f"Warning: Could not parse duration string: {duration_str}")
+        return 0
+
 def main():
     # Get commit info from environment variables
     commit_sha = os.environ.get('GITHUB_SHA')
@@ -95,33 +116,47 @@ def main():
     reports = []
     if os.path.exists('reports.json'):
         try:
-            # Make a backup of existing reports.json
-            os.system('cp reports.json reports.json.backup')
+            # Make a backup of existing reports.json first
+            shutil.copy2('reports.json', 'reports.json.backup')
             print("Created backup of reports.json")
             
             with open('reports.json', 'r') as f:
-                content = f.read()
-                print(f"Raw content of reports.json: {content}")
-                # Only try to parse if content is not empty
-                if content.strip():
+                content = f.read().strip()
+                if content:
                     reports = json.loads(content)
-                    print(f'Loaded {len(reports)} existing reports from reports.json')
+                    if not isinstance(reports, list):
+                        print('Warning: reports.json does not contain a list, resetting to empty list')
+                        reports = []
+                    else:
+                        print(f'Loaded {len(reports)} existing reports from reports.json')
                 else:
                     print('reports.json is empty, starting with empty list')
-        except json.JSONDecodeError as e:
-            print(f'Error decoding reports.json: {str(e)}')
-            # Try to recover from potential corrupted files
+        except (json.JSONDecodeError, IOError) as e:
+            print(f'Error with reports.json: {type(e).__name__}: {str(e)}')
+            # Try to recover from backup
             if os.path.exists('reports.json.backup'):
-                print('Trying to recover from backup')
+                print('Attempting to recover from backup file')
                 try:
                     with open('reports.json.backup', 'r') as f:
-                        reports = json.load(f)
-                        print(f'Recovered {len(reports)} reports from backup')
-                except Exception as e:
-                    print(f'Failed to recover from backup: {str(e)}')
-            reports = reports or []  # Ensure reports is a list
+                        backup_content = f.read().strip()
+                        if backup_content:
+                            reports = json.loads(backup_content)
+                            if isinstance(reports, list):
+                                print(f'Successfully recovered {len(reports)} reports from backup')
+                            else:
+                                print('Backup does not contain a valid list, using empty list')
+                                reports = []
+                        else:
+                            print('Backup file is empty, using empty list')
+                except Exception as recover_err:
+                    print(f'Recovery failed: {type(recover_err).__name__}: {str(recover_err)}')
+                    reports = []
+            else:
+                print('No backup file found, using empty list')
+                reports = []
     else:
         print('reports.json not found, starting with empty list')
+        # Create the file with an empty list
         with open('reports.json', 'w') as f:
             json.dump([], f)
             print('Created empty reports.json file')
@@ -195,155 +230,6 @@ def main():
                 margin-bottom: 40px;
                 max-width: 360px; /* Making grid container smaller */
                 margin: 0 auto 40px;
-            }
-            
-            /* Duration Graph Styles */
-            .duration-graph {
-                margin: 40px auto;
-                max-width: 800px;
-                background-color: white;
-                border-radius: 8px;
-                padding: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            
-            .duration-graph h2 {
-                margin-top: 0;
-                margin-bottom: 20px;
-                color: #333;
-                font-size: 1.3rem;
-            }
-            
-            .graph-container {
-                height: 250px;
-                position: relative;
-                margin-top: 30px;
-                display: flex;
-                align-items: flex-end;
-                border-bottom: 2px solid #ddd;
-                border-left: 2px solid #ddd;
-                padding-right: 20px;
-            }
-            
-            .line-chart {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                height: 100%;
-                width: 100%;
-            }
-            
-            .line-path {
-                fill: none;
-                stroke: #007bff;
-                stroke-width: 3;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-            }
-            
-            .data-point {
-                position: absolute;
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                margin-left: -5px;
-                margin-top: -5px;
-                z-index: 2;
-                transition: transform 0.2s ease;
-            }
-            
-            .data-point:hover {
-                transform: scale(1.5);
-            }
-            
-            .data-point.success {
-                background-color: #28a745;
-            }
-            
-            .data-point.failure {
-                background-color: #dc3545;
-            }
-            
-            .data-point.unknown {
-                background-color: #6c757d;
-            }
-            
-            .data-label {
-                position: absolute;
-                padding: 5px 8px;
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                transform: translateY(-100%) translateX(-50%);
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-                white-space: nowrap;
-                z-index: 3;
-            }
-            
-            .data-point:hover + .data-label {
-                opacity: 1;
-            }
-            
-            .x-axis-labels {
-                position: absolute;
-                bottom: -30px;
-                left: 0;
-                right: 0;
-                display: flex;
-                justify-content: space-between;
-                font-size: 0.8rem;
-                color: #666;
-                padding-right: 20px;
-            }
-            
-            .x-axis-label {
-                width: 30px;
-                text-align: center;
-                transform: translateX(-50%);
-            }
-            
-            .y-axis {
-                position: absolute;
-                left: -50px;
-                top: 0;
-                bottom: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                color: #666;
-                font-size: 0.8rem;
-            }
-            
-            .y-axis-label {
-                margin-right: 10px;
-            }
-            
-            .grid-lines {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 1;
-            }
-            
-            .grid-line {
-                position: absolute;
-                left: 0;
-                right: 0;
-                border-bottom: 1px dashed #eee;
-            }
-            
-            .no-data-message {
-                text-align: center;
-                color: #666;
-                padding: 50px 0;
-                font-style: italic;
             }
             
             .history-square {
@@ -422,6 +308,37 @@ def main():
             .history-tooltip .duration {
                 font-size: 0.75em; /* Even smaller for dates */
                 opacity: 0.7;
+            }
+            
+            /* Duration Graph Styles */
+            .duration-graph {
+                margin: 40px auto;
+                max-width: 800px;
+                background-color: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .duration-graph h2 {
+                margin-top: 0;
+                margin-bottom: 20px;
+                color: #333;
+                font-size: 1.3rem;
+            }
+            
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+                margin-top: 20px;
+            }
+            
+            .no-data-message {
+                text-align: center;
+                color: #666;
+                padding: 50px 0;
+                font-style: italic;
             }
             
             /* Existing styles */
@@ -511,111 +428,130 @@ def main():
             <div class="duration-graph">
                 <h2>Build Duration Graph</h2>
                 {% if reports|length > 0 %}
-                    {% set durations = [] %}
-                    {% for report in reports %}
-                        {% if report.duration and report.duration != "Unknown" %}
-                            {% set seconds = 0 %}
-                            {% set parts = report.duration.split(':') %}
-                            {% if parts|length == 3 %}
-                                {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
-                            {% elif parts|length == 2 %}
-                                {% set seconds = parts[0]|int * 60 + parts[1]|int %}
-                            {% elif parts|length == 1 %}
-                                {% set seconds = parts[0]|int %}
-                            {% endif %}
-                            {% set _ = durations.append(seconds) %}
-                        {% else %}
-                            {% set _ = durations.append(0) %}
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% set max_duration = namespace(value=1) %}
-                    {% if durations|length > 0 %}
-                        {% for d in durations %}
-                            {% if d > max_duration.value %}
-                                {% set max_duration.value = d %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <div class="graph-container">
-                        <!-- Grid lines -->
-                        <div class="grid-lines">
-                            <div class="grid-line" style="bottom: 0%;"></div>
-                            <div class="grid-line" style="bottom: 25%;"></div>
-                            <div class="grid-line" style="bottom: 50%;"></div>
-                            <div class="grid-line" style="bottom: 75%;"></div>
-                            <div class="grid-line" style="bottom: 100%;"></div>
-                        </div>
-                        
-                        <!-- Y-axis labels -->
-                        <div class="y-axis">
-                            <div class="y-axis-label">{{ max_duration.value // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration.value * 3 // 4 // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration.value // 2 // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration.value // 4 // 60 }}m</div>
-                            <div class="y-axis-label">0m</div>
-                        </div>
-                        
-                        <!-- X-axis labels -->
-                        <div class="x-axis-labels">
-                            {% for report in reports %}
-                                <div class="x-axis-label">{{ report.run_number }}</div>
-                            {% endfor %}
-                        </div>
-                        
-                        <!-- Line chart -->
-                        <svg class="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <polyline
-                                class="line-path"
-                                points="
-                                {% for report in reports %}
-                                    {% set seconds = 0 %}
-                                    {% if report.duration and report.duration != "Unknown" %}
-                                        {% set parts = report.duration.split(':') %}
-                                        {% if parts|length == 3 %}
-                                            {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
-                                        {% elif parts|length == 2 %}
-                                            {% set seconds = parts[0]|int * 60 + parts[1]|int %}
-                                        {% elif parts|length == 1 %}
-                                            {% set seconds = parts[0]|int %}
-                                        {% endif %}
-                                    {% endif %}
-                                    
-                                    {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
-                                    {% set y_pos = 100 - height_percent %}
-                                    {% set x_pos = (loop.index0 / (reports|length - 1)) * 100 if reports|length > 1 else 50 %}
-                                    {{ x_pos }},{{ y_pos }}
-                                {% endfor %}
-                                "
-                            />
-                        </svg>
-                        
-                        <!-- Data points -->
-                        {% for report in reports %}
-                            {% set seconds = 0 %}
-                            {% if report.duration and report.duration != "Unknown" %}
-                                {% set parts = report.duration.split(':') %}
-                                {% if parts|length == 3 %}
-                                    {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
-                                {% elif parts|length == 2 %}
-                                    {% set seconds = parts[0]|int * 60 + parts[1]|int %}
-                                {% elif parts|length == 1 %}
-                                    {% set seconds = parts[0]|int %}
-                                {% endif %}
-                            {% endif %}
-                            
-                            {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
-                            {% set y_pos = 100 - height_percent %}
-                            {% set x_pos = (loop.index0 / (reports|length - 1)) * 100 if reports|length > 1 else 50 %}
-                            
-                            <div class="data-point {{ report.status }}" style="left: {{ x_pos }}%; top: {{ y_pos }}%;"></div>
-                            <div class="data-label" style="left: {{ x_pos }}%; top: {{ y_pos }}%;">
-                                Run #{{ report.run_number }}<br>
-                                {{ report.duration if report.duration and report.duration != "Unknown" else "Unknown" }}
-                            </div>
-                        {% endfor %}
+                    <div class="chart-container">
+                        <canvas id="durationChart"></canvas>
                     </div>
+                    
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+                    <script>
+                        // Prepare data for Chart.js
+                        const labels = [{% for report in reports|reverse %}'Run #{{ report.run_number }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+                        const durations = [
+                            {% for report in reports|reverse %}
+                                {% set seconds = parse_duration_to_seconds(report.duration) %}
+                                {{ seconds // 60 }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        ];
+                        const statuses = [
+                            {% for report in reports|reverse %}
+                                '{{ report.status }}'{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        ];
+                        const formattedDurations = [
+                            {% for report in reports|reverse %}
+                                '{{ report.duration if report.duration and report.duration != "Unknown" else "Unknown" }}'{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        ];
+                        const commitShas = [
+                            {% for report in reports|reverse %}
+                                '{{ report.sha[:7] }}'{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        ];
+                        
+                        // Create point colors based on status
+                        const pointBackgroundColors = statuses.map(status => {
+                            if (status === 'success') return '#28a745';
+                            if (status === 'failure') return '#dc3545';
+                            return '#6c757d';
+                        });
+                        
+                        // Create and render the chart
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const ctx = document.getElementById('durationChart').getContext('2d');
+                            const myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Build Duration (minutes)',
+                                        data: durations,
+                                        fill: {
+                                            target: 'origin',
+                                            above: 'rgba(33, 150, 243, 0.1)',
+                                        },
+                                        borderColor: 'rgba(33, 150, 243, 0.8)',
+                                        borderWidth: 3,
+                                        tension: 0.2,
+                                        pointRadius: 6,
+                                        pointHoverRadius: 9,
+                                        pointBackgroundColor: pointBackgroundColors,
+                                        pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                                        pointBorderWidth: 2
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    plugins: {
+                                        tooltip: {
+                                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                            padding: 12,
+                                            titleFont: {
+                                                size: 14
+                                            },
+                                            bodyFont: {
+                                                size: 13
+                                            },
+                                            callbacks: {
+                                                afterTitle: function(context) {
+                                                    const index = context[0].dataIndex;
+                                                    return `Commit: ${commitShas[index]}`;
+                                                },
+                                                label: function(context) {
+                                                    const index = context.dataIndex;
+                                                    const duration = formattedDurations[index];
+                                                    return `Duration: ${duration}`;
+                                                }
+                                            }
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            title: {
+                                                display: true,
+                                                text: 'Minutes',
+                                                font: {
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.05)'
+                                            },
+                                            ticks: {
+                                                padding: 10
+                                            }
+                                        },
+                                        x: {
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.05)'
+                                            },
+                                            ticks: {
+                                                padding: 10
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    </script>
                 {% else %}
                     <div class="no-data-message">No duration data available</div>
                 {% endif %}
@@ -644,9 +580,14 @@ def main():
     </html>
     ''')
     
-    with open('index.html', 'w') as f:
-        f.write(template.render(reports=reports, now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
-    print("Generated index.html successfully")
+    try:
+        rendered_html = template.render(reports=reports, now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        with open('index.html', 'w') as f:
+            f.write(rendered_html)
+        print("Generated index.html successfully")
+    except Exception as e:
+        print(f"Error generating index.html: {type(e).__name__}: {str(e)}")
+        return 1
     
     return 0
 

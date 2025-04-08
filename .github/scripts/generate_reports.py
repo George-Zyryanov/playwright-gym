@@ -14,12 +14,13 @@ Required Environment Variables:
   - GITHUB_RUN_NUMBER: The GitHub Actions run number
   - GITHUB_RUN_ID: The GitHub Actions run ID
   - BUILD_STATUS: The build job status (success, failure, etc.)
+  - BUILD_DURATION: (Optional) The build duration in seconds
 """
 
 import os
 import json
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from jinja2 import Template
 import glob
 import sys
@@ -39,6 +40,23 @@ def main():
     
     # Get build job status - convert to lowercase for consistency
     build_status = os.environ.get('BUILD_STATUS', '').lower()
+    
+    # Get build duration if available (in seconds)
+    try:
+        build_duration_seconds = int(os.environ.get('BUILD_DURATION', '0'))
+        # Format duration in a human-readable format
+        if build_duration_seconds > 0:
+            duration = str(timedelta(seconds=build_duration_seconds))
+            # Remove microseconds if present
+            if '.' in duration:
+                duration = duration.split('.')[0]
+        else:
+            duration = "Unknown"
+    except ValueError:
+        print(f"Error: Invalid build duration: {os.environ.get('BUILD_DURATION')}")
+        duration = "Unknown"
+    
+    print(f"Build duration: {duration}")
 
     # Map GitHub Actions status to our status values
     status_map = {
@@ -116,7 +134,8 @@ def main():
         'run_id': run_id,
         'timestamp': datetime.now().isoformat(),
         'url': f'reports/{commit_sha}/index.html',
-        'status': status
+        'status': status,
+        'duration': duration
     }
     
     # Check if the current commit is already in reports
@@ -178,6 +197,94 @@ def main():
                 margin: 0 auto 40px;
             }
             
+            /* Duration Graph Styles */
+            .duration-graph {
+                margin: 40px auto;
+                max-width: 800px;
+                background-color: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .duration-graph h2 {
+                margin-top: 0;
+                margin-bottom: 20px;
+                color: #333;
+                font-size: 1.3rem;
+            }
+            
+            .graph-container {
+                height: 250px;
+                position: relative;
+                margin-top: 30px;
+                display: flex;
+                align-items: flex-end;
+                border-bottom: 2px solid #ddd;
+                border-left: 2px solid #ddd;
+            }
+            
+            .bar {
+                flex: 1;
+                background-color: #007bff;
+                margin: 0 5px;
+                position: relative;
+                min-width: 20px;
+                transition: height 0.3s ease;
+                border-radius: 4px 4px 0 0;
+            }
+            
+            .bar.success {
+                background-color: #28a745;
+            }
+            
+            .bar.failure {
+                background-color: #dc3545;
+            }
+            
+            .bar-label {
+                position: absolute;
+                bottom: -25px;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 0.8rem;
+                color: #666;
+            }
+            
+            .duration-label {
+                position: absolute;
+                top: -25px;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 0.8rem;
+                color: #666;
+            }
+            
+            .y-axis {
+                position: absolute;
+                left: -40px;
+                top: 0;
+                bottom: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                color: #666;
+                font-size: 0.8rem;
+            }
+            
+            .y-axis-label {
+                margin-right: 10px;
+            }
+            
+            .no-data-message {
+                text-align: center;
+                color: #666;
+                padding: 50px 0;
+                font-style: italic;
+            }
+            
             .history-square {
                 aspect-ratio: 1;
                 width: 60px; /* Fixed width to make squares smaller */
@@ -187,6 +294,14 @@ def main():
                 position: relative;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
                 overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: rgba(255, 255, 255, 0.9);
+                font-weight: bold;
+                font-size: 0.85rem;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+                text-decoration: none;
             }
             
             .history-square:hover {
@@ -239,6 +354,11 @@ def main():
             }
             
             .history-tooltip .timestamp {
+                font-size: 0.75em; /* Even smaller for dates */
+                opacity: 0.7;
+            }
+            
+            .history-tooltip .duration {
                 font-size: 0.75em; /* Even smaller for dates */
                 opacity: 0.7;
             }
@@ -305,20 +425,92 @@ def main():
             <div class="history-grid">
                 {% for report in reports %}
                 <a href="{{ report.url }}" class="history-square {{ report.status }}">
+                    {{ report.run_number }}
                     <div class="history-tooltip">
                         <div class="run-number">Run #{{ report.run_number }}</div>
                         <div class="commit-sha">{{ report.sha[:7] }}</div>
                         <div class="timestamp">{{ report.timestamp.split('T')[0] }}</div>
+                        {% if report.duration and report.duration != "Unknown" %}
+                        <div class="duration">{{ report.duration }}</div>
+                        {% endif %}
                     </div>
                 </a>
                 {% endfor %}
                 {% for i in range(10 - reports|length) %}
                 <div class="history-square unknown">
+                    -
                     <div class="history-tooltip">
                         <div class="run-number">No data</div>
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+            
+            <!-- Duration Graph -->
+            <div class="duration-graph">
+                <h2>Build Duration Graph</h2>
+                {% if reports|length > 0 %}
+                    {% set durations = [] %}
+                    {% for report in reports %}
+                        {% if report.duration and report.duration != "Unknown" %}
+                            {% set seconds = 0 %}
+                            {% set parts = report.duration.split(':') %}
+                            {% if parts|length == 3 %}
+                                {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
+                            {% elif parts|length == 2 %}
+                                {% set seconds = parts[0]|int * 60 + parts[1]|int %}
+                            {% elif parts|length == 1 %}
+                                {% set seconds = parts[0]|int %}
+                            {% endif %}
+                            {% set _ = durations.append(seconds) %}
+                        {% else %}
+                            {% set _ = durations.append(0) %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% set max_duration = namespace(value=1) %}
+                    {% if durations|length > 0 %}
+                        {% for d in durations %}
+                            {% if d > max_duration.value %}
+                                {% set max_duration.value = d %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="graph-container">
+                        <div class="y-axis">
+                            <div class="y-axis-label">{{ max_duration.value // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value * 3 // 4 // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value // 2 // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value // 4 // 60 }}m</div>
+                            <div class="y-axis-label">0m</div>
+                        </div>
+                        
+                        {% for report in reports %}
+                            {% set seconds = 0 %}
+                            {% if report.duration and report.duration != "Unknown" %}
+                                {% set parts = report.duration.split(':') %}
+                                {% if parts|length == 3 %}
+                                    {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
+                                {% elif parts|length == 2 %}
+                                    {% set seconds = parts[0]|int * 60 + parts[1]|int %}
+                                {% elif parts|length == 1 %}
+                                    {% set seconds = parts[0]|int %}
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
+                            {% set height = (height_percent * 230 / 100)|round|int %}
+                            
+                            <div class="bar {{ report.status }}" style="height: {{ height }}px;">
+                                <div class="duration-label">{{ report.duration if report.duration and report.duration != "Unknown" else "-" }}</div>
+                                <div class="bar-label">Run #{{ report.run_number }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-data-message">No duration data available</div>
+                {% endif %}
             </div>
             
             <!-- Existing Reports List -->
@@ -331,6 +523,9 @@ def main():
                 <div class='commit-message'>{{ report.message }}</div>
                 <div class='timestamp'>{{ report.timestamp.split('T')[0] }} {{ report.timestamp.split('T')[1].split('.')[0] }}</div>
                 <div>Commit: {{ report.sha[:7] }}</div>
+                {% if report.duration %}
+                <div class='duration'>Duration: {{ report.duration }}</div>
+                {% endif %}
             </div>
             {% endfor %}
             <footer>
@@ -348,4 +543,10 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    try:
+        sys.exit(main())
+    except Exception as e:
+        print(f"ERROR: Script failed with exception: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1) 

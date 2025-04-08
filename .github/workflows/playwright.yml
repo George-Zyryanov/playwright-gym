@@ -124,7 +124,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
-      contents: read
+      contents: write
     
     steps:
       - name: Checkout main branch
@@ -137,6 +137,7 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages-checkout
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -201,12 +202,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install jinja2
-
-      - name: Configure Git
-        working-directory: gh-pages-checkout
-        run: |
-          git config --global user.email "georgezyryanov@gmail.com"
-          git config --global user.name "George Zyryanov"
 
       - name: Generate index page and prepare reports
         working-directory: gh-pages-checkout
@@ -390,8 +385,11 @@ jobs:
       - name: Commit and Push to gh-pages
         working-directory: gh-pages-checkout
         run: |
+          git config --global user.email "georgezyryanov@gmail.com"
+          git config --global user.name "George Zyryanov"
           git add .
           git commit -m "Update reports for run #${{ github.run_number }}" || echo "No changes to commit"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push
 
       - name: Upload GitHub Pages artifact

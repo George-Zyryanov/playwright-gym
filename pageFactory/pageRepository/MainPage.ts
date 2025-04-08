@@ -23,11 +23,14 @@ export class MainPage {
 
     async navigateToURL(): Promise<void> {
         await this.page.goto("/");
-        try {
-            await this.dialogWindowConsentButton.click()
 
-        } catch (Error) {
-            console.log("The modal window was not present. Error --> ",Error);
+        const isDialogVisible = await this.dialogWindowConsentButton
+        .waitFor({state: 'visible', timeout: 3000})
+        .then(()=> true)
+        .catch(() => false)
+
+        if (isDialogVisible) {
+            await this.dialogWindowConsentButton.click();
         }
     }
 }

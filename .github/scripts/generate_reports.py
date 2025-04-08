@@ -468,14 +468,21 @@ def main():
                         {% endif %}
                     {% endfor %}
                     
-                    {% set max_duration = durations|max or 1 %}
+                    {% set max_duration = namespace(value=1) %}
+                    {% if durations|length > 0 %}
+                        {% for d in durations %}
+                            {% if d > max_duration.value %}
+                                {% set max_duration.value = d %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                     
                     <div class="graph-container">
                         <div class="y-axis">
-                            <div class="y-axis-label">{{ max_duration // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration * 3 // 4 // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration // 2 // 60 }}m</div>
-                            <div class="y-axis-label">{{ max_duration // 4 // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value * 3 // 4 // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value // 2 // 60 }}m</div>
+                            <div class="y-axis-label">{{ max_duration.value // 4 // 60 }}m</div>
                             <div class="y-axis-label">0m</div>
                         </div>
                         
@@ -492,7 +499,7 @@ def main():
                                 {% endif %}
                             {% endif %}
                             
-                            {% set height_percent = (seconds / max_duration) * 100 if seconds > 0 else 0 %}
+                            {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
                             {% set height = (height_percent * 230 / 100)|round|int %}
                             
                             <div class="bar {{ report.status }}" style="height: {{ height }}px;">
@@ -536,4 +543,10 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    try:
+        sys.exit(main())
+    except Exception as e:
+        print(f"ERROR: Script failed with exception: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1) 

@@ -222,49 +222,94 @@ def main():
                 align-items: flex-end;
                 border-bottom: 2px solid #ddd;
                 border-left: 2px solid #ddd;
+                padding-right: 20px;
             }
             
-            .bar {
-                flex: 1;
-                background-color: #007bff;
-                margin: 0 5px;
-                position: relative;
-                min-width: 20px;
-                transition: height 0.3s ease;
-                border-radius: 4px 4px 0 0;
+            .line-chart {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 100%;
+                width: 100%;
             }
             
-            .bar.success {
+            .line-path {
+                fill: none;
+                stroke: #007bff;
+                stroke-width: 3;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            
+            .data-point {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                margin-left: -5px;
+                margin-top: -5px;
+                z-index: 2;
+                transition: transform 0.2s ease;
+            }
+            
+            .data-point:hover {
+                transform: scale(1.5);
+            }
+            
+            .data-point.success {
                 background-color: #28a745;
             }
             
-            .bar.failure {
+            .data-point.failure {
                 background-color: #dc3545;
             }
             
-            .bar-label {
-                position: absolute;
-                bottom: -25px;
-                left: 0;
-                right: 0;
-                text-align: center;
-                font-size: 0.8rem;
-                color: #666;
+            .data-point.unknown {
+                background-color: #6c757d;
             }
             
-            .duration-label {
+            .data-label {
                 position: absolute;
-                top: -25px;
+                padding: 5px 8px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                transform: translateY(-100%) translateX(-50%);
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                white-space: nowrap;
+                z-index: 3;
+            }
+            
+            .data-point:hover + .data-label {
+                opacity: 1;
+            }
+            
+            .x-axis-labels {
+                position: absolute;
+                bottom: -30px;
                 left: 0;
                 right: 0;
-                text-align: center;
+                display: flex;
+                justify-content: space-between;
                 font-size: 0.8rem;
                 color: #666;
+                padding-right: 20px;
+            }
+            
+            .x-axis-label {
+                width: 30px;
+                text-align: center;
+                transform: translateX(-50%);
             }
             
             .y-axis {
                 position: absolute;
-                left: -40px;
+                left: -50px;
                 top: 0;
                 bottom: 0;
                 display: flex;
@@ -276,6 +321,22 @@ def main():
             
             .y-axis-label {
                 margin-right: 10px;
+            }
+            
+            .grid-lines {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+            }
+            
+            .grid-line {
+                position: absolute;
+                left: 0;
+                right: 0;
+                border-bottom: 1px dashed #eee;
             }
             
             .no-data-message {
@@ -478,6 +539,16 @@ def main():
                     {% endif %}
                     
                     <div class="graph-container">
+                        <!-- Grid lines -->
+                        <div class="grid-lines">
+                            <div class="grid-line" style="bottom: 0%;"></div>
+                            <div class="grid-line" style="bottom: 25%;"></div>
+                            <div class="grid-line" style="bottom: 50%;"></div>
+                            <div class="grid-line" style="bottom: 75%;"></div>
+                            <div class="grid-line" style="bottom: 100%;"></div>
+                        </div>
+                        
+                        <!-- Y-axis labels -->
                         <div class="y-axis">
                             <div class="y-axis-label">{{ max_duration.value // 60 }}m</div>
                             <div class="y-axis-label">{{ max_duration.value * 3 // 4 // 60 }}m</div>
@@ -486,6 +557,41 @@ def main():
                             <div class="y-axis-label">0m</div>
                         </div>
                         
+                        <!-- X-axis labels -->
+                        <div class="x-axis-labels">
+                            {% for report in reports %}
+                                <div class="x-axis-label">{{ report.run_number }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Line chart -->
+                        <svg class="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <polyline
+                                class="line-path"
+                                points="
+                                {% for report in reports %}
+                                    {% set seconds = 0 %}
+                                    {% if report.duration and report.duration != "Unknown" %}
+                                        {% set parts = report.duration.split(':') %}
+                                        {% if parts|length == 3 %}
+                                            {% set seconds = parts[0]|int * 3600 + parts[1]|int * 60 + parts[2]|int %}
+                                        {% elif parts|length == 2 %}
+                                            {% set seconds = parts[0]|int * 60 + parts[1]|int %}
+                                        {% elif parts|length == 1 %}
+                                            {% set seconds = parts[0]|int %}
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
+                                    {% set y_pos = 100 - height_percent %}
+                                    {% set x_pos = (loop.index0 / (reports|length - 1)) * 100 if reports|length > 1 else 50 %}
+                                    {{ x_pos }},{{ y_pos }}
+                                {% endfor %}
+                                "
+                            />
+                        </svg>
+                        
+                        <!-- Data points -->
                         {% for report in reports %}
                             {% set seconds = 0 %}
                             {% if report.duration and report.duration != "Unknown" %}
@@ -500,11 +606,13 @@ def main():
                             {% endif %}
                             
                             {% set height_percent = (seconds / max_duration.value) * 100 if seconds > 0 else 0 %}
-                            {% set height = (height_percent * 230 / 100)|round|int %}
+                            {% set y_pos = 100 - height_percent %}
+                            {% set x_pos = (loop.index0 / (reports|length - 1)) * 100 if reports|length > 1 else 50 %}
                             
-                            <div class="bar {{ report.status }}" style="height: {{ height }}px;">
-                                <div class="duration-label">{{ report.duration if report.duration and report.duration != "Unknown" else "-" }}</div>
-                                <div class="bar-label">Run #{{ report.run_number }}</div>
+                            <div class="data-point {{ report.status }}" style="left: {{ x_pos }}%; top: {{ y_pos }}%;"></div>
+                            <div class="data-label" style="left: {{ x_pos }}%; top: {{ y_pos }}%;">
+                                Run #{{ report.run_number }}<br>
+                                {{ report.duration if report.duration and report.duration != "Unknown" else "Unknown" }}
                             </div>
                         {% endfor %}
                     </div>

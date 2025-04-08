@@ -1,5 +1,15 @@
 [
   {
+    "sha": "db2d5a28ab9196e81044835501f566eded82a0ca",
+    "message": "Enhance report generation script and GitHub Actions workflow: implement a line chart for visualizing test durations in HTML reports, improving data representation. Update CSS styles for data points and labels to enhance user interaction and clarity. Add grid lines to the chart for better readability and integrate build duration calculation in the workflow for accurate reporting.",
+    "run_number": 24,
+    "run_id": "14331665682",
+    "timestamp": "2025-04-08T10:53:24.093853",
+    "url": "reports/db2d5a28ab9196e81044835501f566eded82a0ca/index.html",
+    "status": "success",
+    "duration": "0:01:50"
+  },
+  {
     "sha": "61cc75ef04f105c31a0f3fa3e6219af8f310f785",
     "message": "Refactor report generation script and GitHub Actions workflow: update max duration calculation to use a namespace for improved clarity, enhance error handling in the script execution, and simplify build duration handling in the workflow for better maintainability.",
     "run_number": 23,

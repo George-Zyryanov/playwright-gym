@@ -252,29 +252,40 @@ jobs:
               with open(f'{report_dir}/index.html', 'w') as f:
                   f.write('<html><body><h1>Playwright Test Report</h1><p>Run #' + str(run_number) + '</p></body></html>')
           
-          # Create or update reports.json
-          report_data = {
-              'sha': commit_sha,
-              'message': commit_message,
-              'run_number': run_number,
-              'run_id': run_id,
-              'timestamp': datetime.now().isoformat(),
-              'url': f'reports/{commit_sha}/index.html',
-              'status': status
-          }
-          
           # Load existing reports or create new list
           reports = []
           if os.path.exists('reports.json'):
               try:
+                  # Make a backup of existing reports.json
+                  os.system('cp reports.json reports.json.backup')
+                  print("Created backup of reports.json")
+                  
                   with open('reports.json', 'r') as f:
-                      reports = json.load(f)
-                  print(f'Loaded {len(reports)} existing reports from reports.json')
-              except json.JSONDecodeError:
+                      content = f.read()
+                      print(f"Raw content of reports.json: {content}")
+                      # Only try to parse if content is not empty
+                      if content.strip():
+                          reports = json.loads(content)
+                          print(f'Loaded {len(reports)} existing reports from reports.json')
+                      else:
+                          print('reports.json is empty, starting with empty list')
+              except json.JSONDecodeError as e:
+                  print(f'Error decoding reports.json: {str(e)}')
+                  # Try to recover from potential corrupted files
+                  if os.path.exists('reports.json.backup'):
+                      print('Trying to recover from backup')
+                      try:
+                          with open('reports.json.backup', 'r') as f:
+                              reports = json.load(f)
+                              print(f'Recovered {len(reports)} reports from backup')
+                      except:
+                          print('Failed to recover from backup')
                   reports = []
-                  print('Error decoding reports.json, starting with empty list')
           else:
               print('reports.json not found, starting with empty list')
+              with open('reports.json', 'w') as f:
+                  json.dump([], f)
+                  print('Created empty reports.json file')
           
           # Check if the current commit is already in reports
           existing_index = None
@@ -286,11 +297,27 @@ jobs:
           if existing_index is not None:
               # Update existing report
               print(f'Updating existing report at index {existing_index}')
-              reports[existing_index] = report_data
+              reports[existing_index] = {
+                  'sha': commit_sha,
+                  'message': commit_message,
+                  'run_number': run_number,
+                  'run_id': run_id,
+                  'timestamp': datetime.now().isoformat(),
+                  'url': f'reports/{commit_sha}/index.html',
+                  'status': status
+              }
           else:
               # Add new report to the beginning
               print('Adding new report to the beginning')
-              reports.insert(0, report_data)
+              reports.insert(0, {
+                  'sha': commit_sha,
+                  'message': commit_message,
+                  'run_number': run_number,
+                  'run_id': run_id,
+                  'timestamp': datetime.now().isoformat(),
+                  'url': f'reports/{commit_sha}/index.html',
+                  'status': status
+              })
           
           # Keep only last 10 reports
           if len(reports) > 10:
@@ -305,17 +332,21 @@ jobs:
           # Keep only the reports directories mentioned in reports.json
           kept_shas = [report['sha'] for report in reports]
           all_report_dirs = glob.glob('reports/*')
-          for dir_path in all_report_dirs:
-              dir_name = os.path.basename(dir_path)
-              if dir_name not in kept_shas and not dir_name.startswith('.'):
-                  print(f'Removing old report directory: {dir_path}')
-                  shutil.rmtree(dir_path)
+          # Only prune directories if we have reports
+          if reports:
+              for dir_path in all_report_dirs:
+                  dir_name = os.path.basename(dir_path)
+                  if dir_name not in kept_shas and not dir_name.startswith('.'):
+                      print(f'Removing old report directory: {dir_path}')
+                      shutil.rmtree(dir_path)
           
           # Generate index.html with links to all reports and status indicators
           template = Template('''
           <!DOCTYPE html>
           <html>
           <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Playwright Test Reports</title>
               <style>
                   body { font-family: Arial, sans-serif; margin: 40px; }
@@ -336,10 +367,11 @@ jobs:
                   .status-unknown { background-color: #6c757d; }
                   h1 { margin-bottom: 30px; }
                   h2 { margin-top: 0; }
+                  .report-count { font-weight: normal; color: #666; margin-left: 10px; }
               </style>
           </head>
           <body>
-              <h1>Playwright Test Reports</h1>
+              <h1>Playwright Test Reports <span class="report-count">({{ reports|length }} reports)</span></h1>
               {% for report in reports %}
               <div class='report'>
                   <h2>
@@ -380,6 +412,18 @@ jobs:
                 echo "✗ NO index.html found in $dir"
               fi
             done
+          fi
+
+      - name: Verify existing reports
+        working-directory: gh-pages-checkout
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          if [ -f "reports.json" ]; then
+            echo "Reports.json exists. Content:"
+            cat reports.json
+          else
+            echo "reports.json does not exist, will be created"
           fi
 
       - name: Commit and Push to gh-pages

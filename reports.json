@@ -1,5 +1,14 @@
 [
   {
+    "sha": "b5875830d7296447f603a80f29f10ad3b61358d8",
+    "message": "Refactor report generation script and GitHub Actions workflow: adjust CSS styles for history grid in HTML reports to enhance visual clarity and user experience. Update Slack notification format to include detailed test run information, improving communication of test results.",
+    "run_number": 21,
+    "run_id": "14330695559",
+    "timestamp": "2025-04-08T10:01:51.946370",
+    "url": "reports/b5875830d7296447f603a80f29f10ad3b61358d8/index.html",
+    "status": "success"
+  },
+  {
     "sha": "fdda337f1113e42194603c49a7bd6f045dc8f4ac",
     "message": "Enhance report generation script: add visual history grid to HTML reports, improving the display of test results with interactive elements for better user experience. Include status indicators for each report and placeholders for missing data.",
     "run_number": 20,

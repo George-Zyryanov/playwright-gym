@@ -15,13 +15,15 @@
                 grid-template-rows: repeat(2, 1fr);
                 gap: 10px;
                 margin-bottom: 40px;
-                max-width: 900px;
+                max-width: 360px; /* Making grid container smaller */
                 margin: 0 auto 40px;
             }
             
             .history-square {
                 aspect-ratio: 1;
-                border-radius: 8px;
+                width: 60px; /* Fixed width to make squares smaller */
+                height: 60px; /* Fixed height to match width */
+                border-radius: 6px; /* Slightly smaller radius to match smaller squares */
                 cursor: pointer;
                 position: relative;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -53,11 +55,11 @@
                 right: 0;
                 background: rgba(0, 0, 0, 0.8);
                 color: white;
-                padding: 8px;
+                padding: 4px; /* Reduced padding to fit smaller squares */
                 transform: translateY(100%);
                 transition: transform 0.2s ease;
-                font-size: 0.8em;
-                line-height: 1.4;
+                font-size: 0.7em; /* Smaller font size */
+                line-height: 1.2; /* Tighter line height */
             }
             
             .history-square:hover .history-tooltip {
@@ -66,17 +68,19 @@
             
             .history-tooltip .run-number {
                 font-weight: bold;
-                margin-bottom: 4px;
+                margin-bottom: 2px; /* Reduced margin for smaller squares */
+                font-size: 0.9em; /* Slightly smaller than parent */
             }
             
             .history-tooltip .commit-sha {
                 font-family: monospace;
-                font-size: 0.9em;
+                font-size: 0.8em; /* Smaller than before */
                 opacity: 0.8;
+                margin-bottom: 1px; /* Add small margin between elements */
             }
             
             .history-tooltip .timestamp {
-                font-size: 0.8em;
+                font-size: 0.75em; /* Even smaller for dates */
                 opacity: 0.7;
             }
             
@@ -136,10 +140,18 @@
     </head>
     <body>
         <div class="container">
-            <h1>Playwright Test Reports <span class="report-count">(3 reports)</span></h1>
+            <h1>Playwright Test Reports <span class="report-count">(4 reports)</span></h1>
             
             <!-- Visual History Grid -->
             <div class="history-grid">
+                
+                <a href="reports/b5875830d7296447f603a80f29f10ad3b61358d8/index.html" class="history-square success">
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #21</div>
+                        <div class="commit-sha">b587583</div>
+                        <div class="timestamp">2025-04-08</div>
+                    </div>
+                </a>
                 
                 <a href="reports/fdda337f1113e42194603c49a7bd6f045dc8f4ac/index.html" class="history-square success">
                     <div class="history-tooltip">
@@ -202,12 +214,6 @@
                     </div>
                 </div>
                 
-                <div class="history-square unknown">
-                    <div class="history-tooltip">
-                        <div class="run-number">No data</div>
-                    </div>
-                </div>
-                
             </div>
             
             <!-- Existing Reports List -->
@@ -215,10 +221,20 @@
             <div class='report'>
                 <h2>
                     <span class='status-indicator status-success'></span>
+                    <a href='reports/b5875830d7296447f603a80f29f10ad3b61358d8/index.html'>Run #21</a>
+                </h2>
+                <div class='commit-message'>Refactor report generation script and GitHub Actions workflow: adjust CSS styles for history grid in HTML reports to enhance visual clarity and user experience. Update Slack notification format to include detailed test run information, improving communication of test results.</div>
+                <div class='timestamp'>2025-04-08 10:01:51</div>
+                <div>Commit: b587583</div>
+            </div>
+            
+            <div class='report'>
+                <h2>
+                    <span class='status-indicator status-success'></span>
                     <a href='reports/fdda337f1113e42194603c49a7bd6f045dc8f4ac/index.html'>Run #20</a>
                 </h2>
                 <div class='commit-message'>Enhance report generation script: add visual history grid to HTML reports, improving the display of test results with interactive elements for better user experience. Include status indicators for each report and placeholders for missing data.</div>
-                <div class='timestamp'>2025-04-08T09:55:43.070028</div>
+                <div class='timestamp'>2025-04-08 09:55:43</div>
                 <div>Commit: fdda337</div>
             </div>
             
@@ -228,7 +244,7 @@
                     <a href='reports/0eb3fd52cdd842ad2387ed20ea7f31eba00bd946/index.html'>Run #19</a>
                 </h2>
                 <div class='commit-message'>Add GitHub Actions script for generating Playwright test reports: implement a dedicated Python script to create HTML reports, manage report history, and streamline report generation process. Update workflow to utilize the new script, ensuring proper environment variable handling and script execution.</div>
-                <div class='timestamp'>2025-04-08T09:49:37.936525</div>
+                <div class='timestamp'>2025-04-08 09:49:37</div>
                 <div>Commit: 0eb3fd5</div>
             </div>
             
@@ -238,12 +254,12 @@
                     <a href='reports/fc3378c748bd790d18f46860f6dd245c05af7eca/index.html'>Run #17</a>
                 </h2>
                 <div class='commit-message'>Update GitHub Actions workflow: change permissions for contents to write, specify GitHub token for checkout, and reintroduce Git configuration for user details during commit to ensure proper attribution in gh-pages updates.</div>
-                <div class='timestamp'>2025-04-08T09:39:54.060026</div>
+                <div class='timestamp'>2025-04-08 09:39:54</div>
                 <div>Commit: fc3378c</div>
             </div>
             
             <footer>
-                Generated by GitHub Actions on 2025-04-08 09:55:43
+                Generated by GitHub Actions on 2025-04-08 10:01:51
             </footer>
         </div>
     </body>

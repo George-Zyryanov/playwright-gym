@@ -19,155 +19,6 @@
                 margin: 0 auto 40px;
             }
             
-            /* Duration Graph Styles */
-            .duration-graph {
-                margin: 40px auto;
-                max-width: 800px;
-                background-color: white;
-                border-radius: 8px;
-                padding: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            
-            .duration-graph h2 {
-                margin-top: 0;
-                margin-bottom: 20px;
-                color: #333;
-                font-size: 1.3rem;
-            }
-            
-            .graph-container {
-                height: 250px;
-                position: relative;
-                margin-top: 30px;
-                display: flex;
-                align-items: flex-end;
-                border-bottom: 2px solid #ddd;
-                border-left: 2px solid #ddd;
-                padding-right: 20px;
-            }
-            
-            .line-chart {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                height: 100%;
-                width: 100%;
-            }
-            
-            .line-path {
-                fill: none;
-                stroke: #007bff;
-                stroke-width: 3;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-            }
-            
-            .data-point {
-                position: absolute;
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                margin-left: -5px;
-                margin-top: -5px;
-                z-index: 2;
-                transition: transform 0.2s ease;
-            }
-            
-            .data-point:hover {
-                transform: scale(1.5);
-            }
-            
-            .data-point.success {
-                background-color: #28a745;
-            }
-            
-            .data-point.failure {
-                background-color: #dc3545;
-            }
-            
-            .data-point.unknown {
-                background-color: #6c757d;
-            }
-            
-            .data-label {
-                position: absolute;
-                padding: 5px 8px;
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                transform: translateY(-100%) translateX(-50%);
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-                white-space: nowrap;
-                z-index: 3;
-            }
-            
-            .data-point:hover + .data-label {
-                opacity: 1;
-            }
-            
-            .x-axis-labels {
-                position: absolute;
-                bottom: -30px;
-                left: 0;
-                right: 0;
-                display: flex;
-                justify-content: space-between;
-                font-size: 0.8rem;
-                color: #666;
-                padding-right: 20px;
-            }
-            
-            .x-axis-label {
-                width: 30px;
-                text-align: center;
-                transform: translateX(-50%);
-            }
-            
-            .y-axis {
-                position: absolute;
-                left: -50px;
-                top: 0;
-                bottom: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                color: #666;
-                font-size: 0.8rem;
-            }
-            
-            .y-axis-label {
-                margin-right: 10px;
-            }
-            
-            .grid-lines {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                z-index: 1;
-            }
-            
-            .grid-line {
-                position: absolute;
-                left: 0;
-                right: 0;
-                border-bottom: 1px dashed #eee;
-            }
-            
-            .no-data-message {
-                text-align: center;
-                color: #666;
-                padding: 50px 0;
-                font-style: italic;
-            }
-            
             .history-square {
                 aspect-ratio: 1;
                 width: 60px; /* Fixed width to make squares smaller */
@@ -246,6 +97,37 @@
                 opacity: 0.7;
             }
             
+            /* Duration Graph Styles */
+            .duration-graph {
+                margin: 40px auto;
+                max-width: 800px;
+                background-color: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            
+            .duration-graph h2 {
+                margin-top: 0;
+                margin-bottom: 20px;
+                color: #333;
+                font-size: 1.3rem;
+            }
+            
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+                margin-top: 20px;
+            }
+            
+            .no-data-message {
+                text-align: center;
+                color: #666;
+                padding: 50px 0;
+                font-style: italic;
+            }
+            
             /* Existing styles */
             .report { 
                 margin: 20px 0; 
@@ -302,10 +184,22 @@
     </head>
     <body>
         <div class="container">
-            <h1>Playwright Test Reports <span class="report-count">(6 reports)</span></h1>
+            <h1>Playwright Test Reports <span class="report-count">(7 reports)</span></h1>
             
             <!-- Visual History Grid -->
             <div class="history-grid">
+                
+                <a href="reports/65042f1e3dae0de6ddd327c302e0a58f92969428/index.html" class="history-square success">
+                    26
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #26</div>
+                        <div class="commit-sha">65042f1</div>
+                        <div class="timestamp">2025-04-08</div>
+                        
+                        <div class="duration">0:00:45</div>
+                        
+                    </div>
+                </a>
                 
                 <a href="reports/db2d5a28ab9196e81044835501f566eded82a0ca/index.html" class="history-square success">
                     24
@@ -393,276 +287,207 @@
                     </div>
                 </div>
                 
-                <div class="history-square unknown">
-                    -
-                    <div class="history-tooltip">
-                        <div class="run-number">No data</div>
-                    </div>
-                </div>
-                
             </div>
             
             <!-- Duration Graph -->
             <div class="duration-graph">
                 <h2>Build Duration Graph</h2>
                 
-                    
-                    
-                        
-                            
-                            
-                            
-                                
-                            
-                            
-                        
-                    
-                        
-                            
-                            
-                            
-                                
-                            
-                            
-                        
-                    
-                        
-                            
-                        
-                    
-                        
-                            
-                        
-                    
-                        
-                            
-                        
-                    
-                        
-                            
-                        
-                    
-                    
-                    
-                    
-                        
-                            
-                                
-                            
-                        
-                            
-                                
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                    
-                    
-                    <div class="graph-container">
-                        <!-- Grid lines -->
-                        <div class="grid-lines">
-                            <div class="grid-line" style="bottom: 0%;"></div>
-                            <div class="grid-line" style="bottom: 25%;"></div>
-                            <div class="grid-line" style="bottom: 50%;"></div>
-                            <div class="grid-line" style="bottom: 75%;"></div>
-                            <div class="grid-line" style="bottom: 100%;"></div>
-                        </div>
-                        
-                        <!-- Y-axis labels -->
-                        <div class="y-axis">
-                            <div class="y-axis-label">3m</div>
-                            <div class="y-axis-label">2m</div>
-                            <div class="y-axis-label">1m</div>
-                            <div class="y-axis-label">0m</div>
-                            <div class="y-axis-label">0m</div>
-                        </div>
-                        
-                        <!-- X-axis labels -->
-                        <div class="x-axis-labels">
-                            
-                                <div class="x-axis-label">24</div>
-                            
-                                <div class="x-axis-label">23</div>
-                            
-                                <div class="x-axis-label">21</div>
-                            
-                                <div class="x-axis-label">20</div>
-                            
-                                <div class="x-axis-label">19</div>
-                            
-                                <div class="x-axis-label">17</div>
-                            
-                        </div>
-                        
-                        <!-- Line chart -->
-                        <svg class="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <polyline
-                                class="line-path"
-                                points="
-                                
-                                    
-                                    
-                                        
-                                        
-                                            
-                                        
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    0.0,38.888888888888886
-                                
-                                    
-                                    
-                                        
-                                        
-                                            
-                                        
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    20.0,0.0
-                                
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    40.0,100
-                                
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    60.0,100
-                                
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    80.0,100
-                                
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    100.0,100
-                                
-                                "
-                            />
-                        </svg>
-                        
-                        <!-- Data points -->
-                        
-                            
-                            
-                                
-                                
-                                    
-                                
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 0.0%; top: 38.888888888888886%;"></div>
-                            <div class="data-label" style="left: 0.0%; top: 38.888888888888886%;">
-                                Run #24<br>
-                                0:01:50
-                            </div>
-                        
-                            
-                            
-                                
-                                
-                                    
-                                
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 20.0%; top: 0.0%;"></div>
-                            <div class="data-label" style="left: 20.0%; top: 0.0%;">
-                                Run #23<br>
-                                0:03:00
-                            </div>
-                        
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 40.0%; top: 100%;"></div>
-                            <div class="data-label" style="left: 40.0%; top: 100%;">
-                                Run #21<br>
-                                Unknown
-                            </div>
-                        
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 60.0%; top: 100%;"></div>
-                            <div class="data-label" style="left: 60.0%; top: 100%;">
-                                Run #20<br>
-                                Unknown
-                            </div>
-                        
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 80.0%; top: 100%;"></div>
-                            <div class="data-label" style="left: 80.0%; top: 100%;">
-                                Run #19<br>
-                                Unknown
-                            </div>
-                        
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <div class="data-point success" style="left: 100.0%; top: 100%;"></div>
-                            <div class="data-label" style="left: 100.0%; top: 100%;">
-                                Run #17<br>
-                                Unknown
-                            </div>
-                        
+                    <div class="chart-container">
+                        <canvas id="durationChart"></canvas>
                     </div>
+                    
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+                    <script>
+                        // Prepare data for Chart.js
+                        const labels = ['Run #17', 'Run #19', 'Run #20', 'Run #21', 'Run #23', 'Run #24', 'Run #26'];
+                        const durations = [
+                            
+                                
+                                0, 
+                            
+                                
+                                0, 
+                            
+                                
+                                0, 
+                            
+                                
+                                0, 
+                            
+                                
+                                3, 
+                            
+                                
+                                1, 
+                            
+                                
+                                0
+                            
+                        ];
+                        const statuses = [
+                            
+                                'success', 
+                            
+                                'success', 
+                            
+                                'success', 
+                            
+                                'success', 
+                            
+                                'success', 
+                            
+                                'success', 
+                            
+                                'success'
+                            
+                        ];
+                        const formattedDurations = [
+                            
+                                'Unknown', 
+                            
+                                'Unknown', 
+                            
+                                'Unknown', 
+                            
+                                'Unknown', 
+                            
+                                '0:03:00', 
+                            
+                                '0:01:50', 
+                            
+                                '0:00:45'
+                            
+                        ];
+                        const commitShas = [
+                            
+                                'fc3378c', 
+                            
+                                '0eb3fd5', 
+                            
+                                'fdda337', 
+                            
+                                'b587583', 
+                            
+                                '61cc75e', 
+                            
+                                'db2d5a2', 
+                            
+                                '65042f1'
+                            
+                        ];
+                        
+                        // Create point colors based on status
+                        const pointBackgroundColors = statuses.map(status => {
+                            if (status === 'success') return '#28a745';
+                            if (status === 'failure') return '#dc3545';
+                            return '#6c757d';
+                        });
+                        
+                        // Create and render the chart
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const ctx = document.getElementById('durationChart').getContext('2d');
+                            const myChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Build Duration (minutes)',
+                                        data: durations,
+                                        fill: {
+                                            target: 'origin',
+                                            above: 'rgba(33, 150, 243, 0.1)',
+                                        },
+                                        borderColor: 'rgba(33, 150, 243, 0.8)',
+                                        borderWidth: 3,
+                                        tension: 0.2,
+                                        pointRadius: 6,
+                                        pointHoverRadius: 9,
+                                        pointBackgroundColor: pointBackgroundColors,
+                                        pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                                        pointBorderWidth: 2
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    plugins: {
+                                        tooltip: {
+                                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                            padding: 12,
+                                            titleFont: {
+                                                size: 14
+                                            },
+                                            bodyFont: {
+                                                size: 13
+                                            },
+                                            callbacks: {
+                                                afterTitle: function(context) {
+                                                    const index = context[0].dataIndex;
+                                                    return `Commit: ${commitShas[index]}`;
+                                                },
+                                                label: function(context) {
+                                                    const index = context.dataIndex;
+                                                    const duration = formattedDurations[index];
+                                                    return `Duration: ${duration}`;
+                                                }
+                                            }
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            title: {
+                                                display: true,
+                                                text: 'Minutes',
+                                                font: {
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.05)'
+                                            },
+                                            ticks: {
+                                                padding: 10
+                                            }
+                                        },
+                                        x: {
+                                            grid: {
+                                                color: 'rgba(0, 0, 0, 0.05)'
+                                            },
+                                            ticks: {
+                                                padding: 10
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    </script>
                 
             </div>
             
             <!-- Existing Reports List -->
+            
+            <div class='report'>
+                <h2>
+                    <span class='status-indicator status-success'></span>
+                    <a href='reports/65042f1e3dae0de6ddd327c302e0a58f92969428/index.html'>Run #26</a>
+                </h2>
+                <div class='commit-message'>Enhance report generation script: add duration parsing function to HTML report rendering, improving the accuracy of displayed test durations. This update ensures that duration data is correctly processed and included in the generated reports.</div>
+                <div class='timestamp'>2025-04-08 11:07:01</div>
+                <div>Commit: 65042f1</div>
+                
+                <div class='duration'>Duration: 0:00:45</div>
+                
+            </div>
             
             <div class='report'>
                 <h2>
@@ -735,7 +560,7 @@
             </div>
             
             <footer>
-                Generated by GitHub Actions on 2025-04-08 10:53:24
+                Generated by GitHub Actions on 2025-04-08 11:07:01
             </footer>
         </div>
     </body>

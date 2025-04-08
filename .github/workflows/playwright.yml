@@ -112,12 +112,33 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: html-report
-          path: html-report.zip
+          path: downloaded-artifact
 
       - name: Extract HTML report
         run: |
+          echo "Listing downloaded artifacts:"
+          ls -la html-report.zip
+          mkdir -p temp-extract
+          
+          # Extract the artifact to a temporary location
+          unzip -o html-report.zip -d temp-extract
+          
+          echo "Temporary extraction contents:"
+          ls -la temp-extract
+          
+          # Create the html-report directory
           mkdir -p html-report
-          unzip -o html-report.zip/html-report.zip -d html-report || unzip -o html-report.zip -d html-report
+          
+          # Handle nested html-report directory if it exists
+          if [ -d "temp-extract/html-report" ]; then
+            echo "Found nested html-report directory"
+            cp -r temp-extract/html-report/* html-report/
+          else
+            echo "No nested directory, copying directly"
+            cp -r temp-extract/* html-report/
+          fi
+          
+          echo "Final html-report contents:"
           ls -la html-report
 
       - name: Setup Python
@@ -135,15 +156,16 @@ jobs:
           git config --global user.email "georgezyryanov@gmail.com"
           git config --global user.name "George Zyryanov"
 
-      - name: Generate index page
+      - name: Generate index page and prepare reports
         run: |
           python -c "
           import os
           import json
+          import shutil
           from datetime import datetime
           from jinja2 import Template
           import glob
-
+          
           # Get commit info
           commit_sha = \"${{ github.sha }}\"
           commit_message = \"${{ github.event.head_commit.message }}\"
@@ -151,10 +173,24 @@ jobs:
           run_id = \"${{ github.run_id }}\"
           
           # Create directory for this run
-          os.makedirs(f'reports/{commit_sha}', exist_ok=True)
+          report_dir = f'reports/{commit_sha}'
+          os.makedirs(report_dir, exist_ok=True)
           
-          # Move report files to versioned directory
-          os.system('cp -r html-report/* reports/' + commit_sha + '/')
+          # Check if html-report exists and has content
+          if os.path.exists('html-report'):
+              # List all files in html-report
+              print('Files in html-report:')
+              for root, dirs, files in os.walk('html-report'):
+                  for file in files:
+                      print(os.path.join(root, file))
+              
+              # Copy files directly to the report directory, not to a nested html-report folder
+              print(f'Copying html-report/* to {report_dir}/')
+              os.system(f'cp -r html-report/* {report_dir}/')
+          else:
+              print('html-report directory not found, creating a simple index.html')
+              with open(f'{report_dir}/index.html', 'w') as f:
+                  f.write('<html><body><h1>Playwright Test Report</h1><p>Run #' + str(run_number) + '</p></body></html>')
           
           # Create or update reports.json
           report_data = {
@@ -184,15 +220,6 @@ jobs:
           # Save updated reports.json
           with open('reports.json', 'w') as f:
               json.dump(reports, f, indent=2)
-          
-          # Find all report directories
-          report_dirs = glob.glob('reports/*')
-          # Keep only the 10 most recent ones (if there are more)
-          if len(report_dirs) > 10:
-              report_dirs.sort(key=os.path.getmtime, reverse=True)
-              for old_dir in report_dirs[10:]:
-                  print(f'Removing old report directory: {old_dir}')
-                  os.system(f'rm -rf {old_dir}')
           
           # Generate index.html with links to all reports
           template = Template('''
@@ -237,7 +264,12 @@ jobs:
           if [ -d "reports" ]; then
             for dir in reports/*/; do
               echo "Contents of $dir:"
-              ls -la "$dir" | head -n 10
+              find "$dir" -type f | sort
+              if [ -f "$dir/index.html" ]; then
+                echo "✓ index.html found in $dir"
+              else
+                echo "✗ NO index.html found in $dir"
+              fi
             done
           fi
 

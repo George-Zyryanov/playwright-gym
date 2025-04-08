@@ -166,6 +166,80 @@ def main():
         <title>Playwright Test Reports</title>
         <style>
             body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
+            
+            /* Visual History Grid Styles */
+            .history-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 40px;
+                max-width: 900px;
+                margin: 0 auto 40px;
+            }
+            
+            .history-square {
+                aspect-ratio: 1;
+                border-radius: 8px;
+                cursor: pointer;
+                position: relative;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                overflow: hidden;
+            }
+            
+            .history-square:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10;
+            }
+            
+            .history-square.success {
+                background-color: #28a745;
+            }
+            
+            .history-square.failure {
+                background-color: #dc3545;
+            }
+            
+            .history-square.unknown {
+                background-color: #6c757d;
+            }
+            
+            .history-tooltip {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px;
+                transform: translateY(100%);
+                transition: transform 0.2s ease;
+                font-size: 0.8em;
+                line-height: 1.4;
+            }
+            
+            .history-square:hover .history-tooltip {
+                transform: translateY(0);
+            }
+            
+            .history-tooltip .run-number {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            
+            .history-tooltip .commit-sha {
+                font-family: monospace;
+                font-size: 0.9em;
+                opacity: 0.8;
+            }
+            
+            .history-tooltip .timestamp {
+                font-size: 0.8em;
+                opacity: 0.7;
+            }
+            
+            /* Existing styles */
             .report { 
                 margin: 20px 0; 
                 padding: 20px; 
@@ -222,6 +296,28 @@ def main():
     <body>
         <div class="container">
             <h1>Playwright Test Reports <span class="report-count">({{ reports|length }} reports)</span></h1>
+            
+            <!-- Visual History Grid -->
+            <div class="history-grid">
+                {% for report in reports %}
+                <a href="{{ report.url }}" class="history-square {{ report.status }}">
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #{{ report.run_number }}</div>
+                        <div class="commit-sha">{{ report.sha[:7] }}</div>
+                        <div class="timestamp">{{ report.timestamp.split('T')[0] }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+                {% for i in range(10 - reports|length) %}
+                <div class="history-square unknown">
+                    <div class="history-tooltip">
+                        <div class="run-number">No data</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Existing Reports List -->
             {% for report in reports %}
             <div class='report'>
                 <h2>

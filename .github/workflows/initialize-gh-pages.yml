@@ -8,11 +8,14 @@ on:
 jobs:
   initialize-gh-pages:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create gh-pages branch
         run: |

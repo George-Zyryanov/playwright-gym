@@ -230,12 +230,30 @@ jobs:
           # Make the script executable
           chmod +x .github/scripts/generate_reports.py
           
+          # Calculate build duration
+          BUILD_START_TIME="${{ github.event.repository.pushed_at }}"
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          # Convert timestamps to seconds since epoch
+          START_SECONDS=$(date -u -d "$BUILD_START_TIME" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$BUILD_START_TIME" +%s 2>/dev/null)
+          END_SECONDS=$(date -u -d "$CURRENT_TIME" +%s 2>/dev/null || date -u -jf "%Y-%m-%dT%H:%M:%SZ" "$CURRENT_TIME" +%s 2>/dev/null)
+          
+          # Calculate duration in seconds, handling errors
+          if [[ -n "$START_SECONDS" && -n "$END_SECONDS" ]]; then
+            BUILD_DURATION=$((END_SECONDS - START_SECONDS))
+            echo "Calculated build duration: $BUILD_DURATION seconds"
+          else
+            BUILD_DURATION=0
+            echo "Could not calculate build duration, defaulting to 0"
+          fi
+          
           # Run the script with environment variables
           export GITHUB_SHA="${{ github.sha }}"
           export COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
           export GITHUB_RUN_NUMBER="${{ github.run_number }}"
           export GITHUB_RUN_ID="${{ github.run_id }}"
           export BUILD_STATUS="${{ needs.build.outputs.build_status }}"
+          export BUILD_DURATION="$BUILD_DURATION"
           
           python .github/scripts/generate_reports.py
 

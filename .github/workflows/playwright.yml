@@ -32,6 +32,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'npm'
           
       # Setup browser cache
       - name: Cache Playwright browsers
@@ -126,8 +127,16 @@ jobs:
       contents: read
     
     steps:
-      - name: Checkout
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          path: main-checkout
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-checkout
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -136,24 +145,22 @@ jobs:
           path: html-report.zip
 
       - name: Extract HTML report
+        working-directory: gh-pages-checkout
         run: |
           echo "Listing downloaded artifacts:"
-          ls -la
+          ls -la ../html-report.zip
           mkdir -p temp-extract
           
           # Find and extract any zip files we have
           echo "Looking for zip files to extract:"
-          find . -maxdepth 1 -name "*.zip" -type f -o -name "html-report.zip" -type d
+          find ../html-report.zip -type f -o -type d
           
-          if [ -f "html-report.zip" ]; then
+          if [ -f "../html-report.zip" ]; then
             echo "Found html-report.zip file"
-            unzip -o html-report.zip -d temp-extract
-          elif [ -d "html-report.zip" ]; then
-            echo "Found html-report.zip directory"
-            find html-report.zip -name "*.zip" -type f -exec unzip -o {} -d temp-extract \;
+            unzip -o ../html-report.zip -d temp-extract
           else
             echo "No html-report.zip found, looking for any zip files"
-            find . -name "*.zip" -type f -exec unzip -o {} -d temp-extract \;
+            find ../html-report.zip -name "*.zip" -type f -exec unzip -o {} -d temp-extract \;
           fi
           
           echo "Temporary extraction contents:"
@@ -196,11 +203,13 @@ jobs:
           pip install jinja2
 
       - name: Configure Git
+        working-directory: gh-pages-checkout
         run: |
           git config --global user.email "georgezyryanov@gmail.com"
           git config --global user.name "George Zyryanov"
 
       - name: Generate index page and prepare reports
+        working-directory: gh-pages-checkout
         run: |
           python -c "
           import os
@@ -265,8 +274,12 @@ jobs:
               try:
                   with open('reports.json', 'r') as f:
                       reports = json.load(f)
+                  print(f'Loaded {len(reports)} existing reports from reports.json')
               except json.JSONDecodeError:
                   reports = []
+                  print('Error decoding reports.json, starting with empty list')
+          else:
+              print('reports.json not found, starting with empty list')
           
           # Check if the current commit is already in reports
           existing_index = None
@@ -277,17 +290,22 @@ jobs:
           
           if existing_index is not None:
               # Update existing report
+              print(f'Updating existing report at index {existing_index}')
               reports[existing_index] = report_data
           else:
               # Add new report to the beginning
+              print('Adding new report to the beginning')
               reports.insert(0, report_data)
           
           # Keep only last 10 reports
-          reports = reports[:10]
+          if len(reports) > 10:
+              print(f'Trimming reports from {len(reports)} to 10')
+              reports = reports[:10]
           
           # Save updated reports.json
           with open('reports.json', 'w') as f:
               json.dump(reports, f, indent=2)
+          print(f'Saved {len(reports)} reports to reports.json')
           
           # Keep only the reports directories mentioned in reports.json
           kept_shas = [report['sha'] for report in reports]
@@ -307,8 +325,8 @@ jobs:
               <style>
                   body { font-family: Arial, sans-serif; margin: 40px; }
                   .report { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; position: relative; }
-                  .commit-message { color: #666; }
-                  .timestamp { color: #888; font-size: 0.9em; }
+                  .commit-message { color: #666; margin-bottom: 10px; }
+                  .timestamp { color: #888; font-size: 0.9em; margin-bottom: 5px; }
                   a { color: #0366d6; text-decoration: none; }
                   a:hover { text-decoration: underline; }
                   .status-indicator {
@@ -321,6 +339,8 @@ jobs:
                   .status-success { background-color: #28a745; }
                   .status-failure { background-color: #dc3545; }
                   .status-unknown { background-color: #6c757d; }
+                  h1 { margin-bottom: 30px; }
+                  h2 { margin-top: 0; }
               </style>
           </head>
           <body>
@@ -346,12 +366,16 @@ jobs:
           
       # Verify directory structure before upload
       - name: Verify directory structure
+        working-directory: gh-pages-checkout
         run: |
           echo "Current directory contents:"
           ls -la
           echo "Reports directory structure:"
           ls -la reports/ || echo "No reports directory found"
+          echo "Reports.json content:"
+          cat reports.json || echo "No reports.json found"
           if [ -d "reports" ]; then
+            echo "Number of report directories: $(ls -l reports | grep -c ^d)"
             for dir in reports/*/; do
               echo "Contents of $dir:"
               find "$dir" -type f | sort
@@ -363,10 +387,17 @@ jobs:
             done
           fi
 
-      - name: Upload artifact
+      - name: Commit and Push to gh-pages
+        working-directory: gh-pages-checkout
+        run: |
+          git add .
+          git commit -m "Update reports for run #${{ github.run_number }}" || echo "No changes to commit"
+          git push
+
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: gh-pages-checkout
 
       - name: Deploy to GitHub Pages
         id: deployment

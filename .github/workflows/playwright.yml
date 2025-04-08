@@ -106,14 +106,26 @@ jobs:
         run: echo "artifact_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
         if: always()
 
-      # Send Slack notification with html-reprt url once the tests are completed
+      # Send Slack notification with html-report url once the tests are completed
       - name: Send Slack notification
         uses: rtCamp/action-slack-notify@v2.2.1
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_CHANNEL: "#playwright-test-reports"
-          SLACK_USERNAME: Playwright GitHub Actions
-          SLACK_MESSAGE: "Test results are available in [Artifacts section](${{ steps.artifact_link.outputs.artifact_url }}) as html-report."
+          SLACK_USERNAME: Playwright Test Bot
+          SLACK_ICON: https://playwright.dev/img/playwright-logo.svg
+          SLACK_COLOR: ${{ job.status == 'success' && 'good' || 'danger' }}
+          SLACK_TITLE: "Playwright Test Results: ${{ job.status }}"
+          SLACK_MESSAGE: |
+            :rocket: *Test Run #${{ github.run_number }} Completed*
+            
+            *Status:* ${{ job.status }}
+            *Commit:* ${{ github.sha }}
+            *Branch:* ${{ github.ref_name }}
+            
+            :page_facing_up: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Artifacts>
+            :chart_with_upwards_trend: <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}|View Test History Dashboard>
+            :bar_chart: <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/${{ github.sha }}|View Latest Test Report>
         if: always()
 
   # Updated job for deploying to GitHub Pages with versioning

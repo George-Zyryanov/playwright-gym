@@ -174,13 +174,15 @@ def main():
                 grid-template-rows: repeat(2, 1fr);
                 gap: 10px;
                 margin-bottom: 40px;
-                max-width: 900px;
+                max-width: 360px; /* Making grid container smaller */
                 margin: 0 auto 40px;
             }
             
             .history-square {
                 aspect-ratio: 1;
-                border-radius: 8px;
+                width: 60px; /* Fixed width to make squares smaller */
+                height: 60px; /* Fixed height to match width */
+                border-radius: 6px; /* Slightly smaller radius to match smaller squares */
                 cursor: pointer;
                 position: relative;
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -212,11 +214,11 @@ def main():
                 right: 0;
                 background: rgba(0, 0, 0, 0.8);
                 color: white;
-                padding: 8px;
+                padding: 4px; /* Reduced padding to fit smaller squares */
                 transform: translateY(100%);
                 transition: transform 0.2s ease;
-                font-size: 0.8em;
-                line-height: 1.4;
+                font-size: 0.7em; /* Smaller font size */
+                line-height: 1.2; /* Tighter line height */
             }
             
             .history-square:hover .history-tooltip {
@@ -225,17 +227,19 @@ def main():
             
             .history-tooltip .run-number {
                 font-weight: bold;
-                margin-bottom: 4px;
+                margin-bottom: 2px; /* Reduced margin for smaller squares */
+                font-size: 0.9em; /* Slightly smaller than parent */
             }
             
             .history-tooltip .commit-sha {
                 font-family: monospace;
-                font-size: 0.9em;
+                font-size: 0.8em; /* Smaller than before */
                 opacity: 0.8;
+                margin-bottom: 1px; /* Add small margin between elements */
             }
             
             .history-tooltip .timestamp {
-                font-size: 0.8em;
+                font-size: 0.75em; /* Even smaller for dates */
                 opacity: 0.7;
             }
             
@@ -325,7 +329,7 @@ def main():
                     <a href='{{ report.url }}'>Run #{{ report.run_number }}</a>
                 </h2>
                 <div class='commit-message'>{{ report.message }}</div>
-                <div class='timestamp'>{{ report.timestamp }}</div>
+                <div class='timestamp'>{{ report.timestamp.split('T')[0] }} {{ report.timestamp.split('T')[1].split('.')[0] }}</div>
                 <div>Commit: {{ report.sha[:7] }}</div>
             </div>
             {% endfor %}

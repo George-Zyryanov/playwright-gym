@@ -1,5 +1,15 @@
 [
   {
+    "sha": "02d70bbc62d0f6d7f46751b81941d9930edd1f54",
+    "message": "Remove browser installation analysis script and streamline Playwright GitHub Actions workflow: eliminate caching checks and analysis steps for Chrome installation, focusing on a direct installation approach with improved reporting of installed browser version. This update simplifies the workflow while maintaining essential functionality.",
+    "run_number": 30,
+    "run_id": "14362639820",
+    "timestamp": "2025-04-09T16:51:12.387000",
+    "url": "reports/02d70bbc62d0f6d7f46751b81941d9930edd1f54/index.html",
+    "status": "success",
+    "duration": "0:01:05"
+  },
+  {
     "sha": "5e9cab56a6bd8510d3e1385a84a53878f6afda95",
     "message": "Enhance browser installation analysis in GitHub Actions: add detailed cache structure output, verify Chrome installation, and improve cache key management to include Playwright configuration. Introduce checks for browser directory permissions and installation success, ensuring better debugging and reporting for Playwright browser setups.",
     "run_number": 29,
@@ -84,15 +94,6 @@
     "run_id": "14330467585",
     "timestamp": "2025-04-08T09:49:37.936525",
     "url": "reports/0eb3fd52cdd842ad2387ed20ea7f31eba00bd946/index.html",
-    "status": "success"
-  },
-  {
-    "sha": "fc3378c748bd790d18f46860f6dd245c05af7eca",
-    "message": "Update GitHub Actions workflow: change permissions for contents to write, specify GitHub token for checkout, and reintroduce Git configuration for user details during commit to ensure proper attribution in gh-pages updates.",
-    "run_number": 17,
-    "run_id": "14330262930",
-    "timestamp": "2025-04-08T09:39:54.060026",
-    "url": "reports/fc3378c748bd790d18f46860f6dd245c05af7eca/index.html",
     "status": "success"
   }
 ]

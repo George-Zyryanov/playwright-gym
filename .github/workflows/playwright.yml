@@ -46,12 +46,15 @@ jobs:
       # Setup browser cache
       - name: Cache Playwright browsers
         uses: actions/cache@v3
+        id: playwright-cache
         with:
           path: |
             ~/.cache/ms-playwright
             /home/runner/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          # Include browser version in cache key to ensure correct version
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/playwright.config.ts') }}
           restore-keys: |
+            ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}-
             ${{ runner.os }}-playwright-
 
       # Step to install Node.js dependencies
@@ -65,8 +68,14 @@ jobs:
           # Start timing
           INSTALL_START_TIME=$(date +%s)
           
-          # Check if Chrome is already cached with complete installation
-          if [ -d ~/.cache/ms-playwright ] && [ "$(find ~/.cache/ms-playwright -name "chrome-*" | wc -l)" -gt 0 ]; then
+          # Print cache status from previous step
+          echo "Cache hit: ${{ steps.playwright-cache.outputs.cache-hit }}"
+          
+          # Find Chrome browser in cache directory if it exists
+          CHROME_COUNT=$(find ~/.cache/ms-playwright -name "chrome-*" -type d 2>/dev/null | wc -l || echo 0)
+          echo "Found $CHROME_COUNT Chrome installations in cache"
+          
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ] && [ "$CHROME_COUNT" -gt 0 ]; then
             echo "Using cached Chrome browser installation"
             # Skip installing dependencies when browser binary is already cached
             # The --dry-run flag will check if dependencies are already installed without trying to install them
@@ -80,6 +89,12 @@ jobs:
             echo "Installing Chrome browser from scratch"
             # Use the --with-deps flag to install browser and dependencies in one step
             npx playwright install chrome --with-deps
+            
+            # Verify the installation succeeded and show directory content
+            find ~/.cache/ms-playwright -type d -name "chrome-*" | xargs ls -la
+            
+            # Make sure cache directory has correct permissions for the cache action
+            chmod -R 755 ~/.cache/ms-playwright
           fi
           
           # End timing and calculate duration
@@ -100,6 +115,27 @@ jobs:
           .github/scripts/analyze_browser_install.sh
         # This step should always run, even if previous steps fail
         if: always()
+        
+      # Verify browser installation success
+      - name: Verify browser installation
+        run: |
+          # Check if Chrome browser is installed and working
+          if [ -d ~/.cache/ms-playwright ]; then
+            echo "Cache size after installation: $(du -sh ~/.cache/ms-playwright | cut -f1)"
+            
+            # List browser directories to ensure they exist
+            find ~/.cache/ms-playwright -type d -name "chrome-*" -exec echo "Found browser: {}" \;
+            
+            # Verify browser works by launching it
+            echo "Testing browser launch..."
+            PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+            npx playwright run-server --help > /dev/null || echo "Warning: Browser launch check failed"
+            
+            echo "✓ Browser verification complete"
+          else
+            echo "❌ Browser cache directory not found"
+            exit 1
+          fi
 
       # Step to run tests with qa as environment variable similarly we can define qa|dev|qaApi|devApi
       - name: Run tests

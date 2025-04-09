@@ -1,5 +1,15 @@
 [
   {
+    "sha": "65042f1e3dae0de6ddd327c302e0a58f92969428",
+    "message": "Enhance report generation script: add duration parsing function to HTML report rendering, improving the accuracy of displayed test durations. This update ensures that duration data is correctly processed and included in the generated reports.",
+    "run_number": 26,
+    "run_id": "14331929361",
+    "timestamp": "2025-04-08T11:07:01.551769",
+    "url": "reports/65042f1e3dae0de6ddd327c302e0a58f92969428/index.html",
+    "status": "success",
+    "duration": "0:00:45"
+  },
+  {
     "sha": "db2d5a28ab9196e81044835501f566eded82a0ca",
     "message": "Enhance report generation script and GitHub Actions workflow: implement a line chart for visualizing test durations in HTML reports, improving data representation. Update CSS styles for data points and labels to enhance user interaction and clarity. Add grid lines to the chart for better readability and integrate build duration calculation in the workflow for accurate reporting.",
     "run_number": 24,

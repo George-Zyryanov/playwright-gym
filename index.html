@@ -184,10 +184,22 @@
     </head>
     <body>
         <div class="container">
-            <h1>Playwright Test Reports <span class="report-count">(8 reports)</span></h1>
+            <h1>Playwright Test Reports <span class="report-count">(9 reports)</span></h1>
             
             <!-- Visual History Grid -->
             <div class="history-grid">
+                
+                <a href="reports/7bf97f1a9164e7a3c60a194564db0a924861f89c/index.html" class="history-square success">
+                    28
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #28</div>
+                        <div class="commit-sha">7bf97f1</div>
+                        <div class="timestamp">2025-04-09</div>
+                        
+                        <div class="duration">0:01:02</div>
+                        
+                    </div>
+                </a>
                 
                 <a href="reports/fcd4f4cd5236bc02f1f1273b5d48502f2a07fd28/index.html" class="history-square success">
                     27
@@ -285,13 +297,6 @@
                     </div>
                 </div>
                 
-                <div class="history-square unknown">
-                    -
-                    <div class="history-tooltip">
-                        <div class="run-number">No data</div>
-                    </div>
-                </div>
-                
             </div>
             
             <!-- Duration Graph -->
@@ -305,7 +310,7 @@
                     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
                     <script>
                         // Prepare data for Chart.js
-                        const labels = ['Run #17', 'Run #19', 'Run #20', 'Run #21', 'Run #23', 'Run #24', 'Run #26', 'Run #27'];
+                        const labels = ['Run #17', 'Run #19', 'Run #20', 'Run #21', 'Run #23', 'Run #24', 'Run #26', 'Run #27', 'Run #28'];
                         const durations = [
                             
                                 
@@ -330,10 +335,15 @@
                                 0, 
                             
                                 
-                                7
+                                7, 
+                            
+                                
+                                1
                             
                         ];
                         const statuses = [
+                            
+                                'success', 
                             
                                 'success', 
                             
@@ -368,7 +378,9 @@
                             
                                 '0:00:45', 
                             
-                                '0:07:06'
+                                '0:07:06', 
+                            
+                                '0:01:02'
                             
                         ];
                         const commitShas = [
@@ -387,7 +399,9 @@
                             
                                 '65042f1', 
                             
-                                'fcd4f4c'
+                                'fcd4f4c', 
+                            
+                                '7bf97f1'
                             
                         ];
                         
@@ -493,6 +507,19 @@
             <div class='report'>
                 <h2>
                     <span class='status-indicator status-success'></span>
+                    <a href='reports/7bf97f1a9164e7a3c60a194564db0a924861f89c/index.html'>Run #28</a>
+                </h2>
+                <div class='commit-message'>Enhance GitHub Actions workflow for Playwright: improve Chrome browser installation process by adding caching checks and performance timing. Introduce analysis step to evaluate installation duration, ensuring efficient dependency management and clearer reporting of installation metrics.</div>
+                <div class='timestamp'>2025-04-09 16:35:25</div>
+                <div>Commit: 7bf97f1</div>
+                
+                <div class='duration'>Duration: 0:01:02</div>
+                
+            </div>
+            
+            <div class='report'>
+                <h2>
+                    <span class='status-indicator status-success'></span>
                     <a href='reports/fcd4f4cd5236bc02f1f1273b5d48502f2a07fd28/index.html'>Run #27</a>
                 </h2>
                 <div class='commit-message'>Enhance test metadata management and reporting: add utility for standardized test metadata, implement custom metadata reporter for console output, and introduce new test scripts with metadata integration. Update package.json with new test commands for filtering by metadata. Additionally, create comprehensive documentation on test metadata usage and best practices.</div>
@@ -587,7 +614,7 @@
             </div>
             
             <footer>
-                Generated by GitHub Actions on 2025-04-09 12:49:30
+                Generated by GitHub Actions on 2025-04-09 16:35:25
             </footer>
         </div>
     </body>

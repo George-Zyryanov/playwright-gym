@@ -1,0 +1,41 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
+            
+      - name: Install Playwright browsers
+        run: |
+          # Check if browser is already in cache and fully installed
+          if [ -d ~/.cache/ms-playwright/chromium-* ]; then
+            echo "Using cached browsers"
+          else
+            echo "Installing browsers from scratch"
+            npx playwright install chrome
+          fi
+        
+      - name: Run Playwright tests
+        run: npx playwright test 

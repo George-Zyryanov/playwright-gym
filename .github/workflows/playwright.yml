@@ -60,15 +60,46 @@ jobs:
 
       # Step to install Chrome browser for Playwright
       - name: Install Chrome browser for Playwright
+        id: install_browser
         run: |
-          # Check if browser is already in cache
-          if [ -d ~/.cache/ms-playwright ] && [ -n "$(ls -A ~/.cache/ms-playwright)" ]; then
-            echo "Using cached browser installation"
-            npx playwright install-deps chrome
+          # Start timing
+          INSTALL_START_TIME=$(date +%s)
+          
+          # Check if Chrome is already cached with complete installation
+          if [ -d ~/.cache/ms-playwright ] && [ "$(find ~/.cache/ms-playwright -name "chrome-*" | wc -l)" -gt 0 ]; then
+            echo "Using cached Chrome browser installation"
+            # Skip installing dependencies when browser binary is already cached
+            # The --dry-run flag will check if dependencies are already installed without trying to install them
+            if npx playwright install-deps chrome --dry-run; then
+              echo "Chrome dependencies are already installed"
+            else
+              echo "Installing Chrome dependencies only (browser binary cached)"
+              PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npx playwright install chrome
+            fi
           else
-            echo "Installing browser from scratch"
-            npx playwright install chrome
+            echo "Installing Chrome browser from scratch"
+            # Use the --with-deps flag to install browser and dependencies in one step
+            npx playwright install chrome --with-deps
           fi
+          
+          # End timing and calculate duration
+          INSTALL_END_TIME=$(date +%s)
+          INSTALL_DURATION=$((INSTALL_END_TIME - INSTALL_START_TIME))
+          echo "install_duration=$INSTALL_DURATION" >> $GITHUB_OUTPUT
+          echo "Browser installation took $INSTALL_DURATION seconds"
+      
+      # Analyze browser installation performance
+      - name: Analyze browser installation
+        run: |
+          echo "Chrome browser installation took ${{ steps.install_browser.outputs.install_duration }} seconds"
+          
+          # Make the analysis script executable
+          chmod +x .github/scripts/analyze_browser_install.sh
+          
+          # Run the analysis script
+          .github/scripts/analyze_browser_install.sh
+        # This step should always run, even if previous steps fail
+        if: always()
 
       # Step to run tests with qa as environment variable similarly we can define qa|dev|qaApi|devApi
       - name: Run tests

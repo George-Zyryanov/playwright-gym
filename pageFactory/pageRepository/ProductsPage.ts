@@ -39,4 +39,12 @@ export class ProductsPage {
         await this.searchInput.fill(productName);
         await this.searchButton.click();
     }
+
+    /**
+     * Get the count of products displayed on the page
+     * @returns The number of products found
+     */
+    async getProductsCount(): Promise<number> {
+        return await this.singleProduct.count();
+    }
 }

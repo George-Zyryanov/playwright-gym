@@ -14,6 +14,13 @@
     "test:record": "npx playwright codegen",
     "test:visual": "npx playwright test visualComparision.test.ts --project=Chrome",
     "test:device": "npx playwright test Emulation.test.ts --project=Device",
+    "test:p1": "npx playwright test --grep @P1 --project=Chrome",
+    "test:p2": "npx playwright test --grep @P2 --project=Chrome",
+    "test:p3": "npx playwright test --grep @P3 --project=Chrome",
+    "test:p4": "npx playwright test --grep @P4 --project=Chrome",
+    "test:by-id": "npx playwright test --grep",
+    "test:by-page": "npx playwright test --grep",
+    "test:by-feature": "npx playwright test --grep",
     "allureReport": "allure serve",
     "lighthouse": "node tests/lighthouse/Lighthouse.js",
     "test:accessibility": "npx playwright test Axe.test.ts --project=Chrome"

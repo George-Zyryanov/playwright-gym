@@ -1,7 +1,18 @@
 import test from '@lib/BaseTest'
 import {expect} from "@playwright/test";
+import { createTestMetadata } from '@lib/TestMetadata';
 
-test('Verify Products Page', {tag: '@Smoke'}, async ({productsPage, mainPage}) =>{
+test('Verify Products Page', createTestMetadata({
+    testId: 'TC001',
+    testName: 'Verify Products Search Functionality',
+    description: 'Verifies that product search returns correct results and displays them properly',
+    linkInTestManagementSys: 'https://testmanagement.example.com/testcase/TC001',
+    priority: 'P1',
+    author: 'George Zyryanov',
+    linkToJiraTicket: 'https://jira.example.com/browse/JIRA-123',
+    pageUnderTest: 'ProductsPage',
+    featureUnderTest: 'ProductSearch'
+}), async ({productsPage, mainPage}) =>{
     await mainPage.navigateToURL();
     await mainPage.clickOnProductsLink();
 

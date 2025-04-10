@@ -1,5 +1,15 @@
 [
   {
+    "sha": "4b0bad99ce6093df6b20b8be9c0b937b5d085f73",
+    "message": "Update GitHub Actions workflow for Playwright deployment: modify the 'deploy' job to ensure it only runs on the main branch and streamline job dependencies for improved clarity and maintainability.",
+    "run_number": 33,
+    "run_id": "14377619985",
+    "timestamp": "2025-04-10T09:58:31.978350",
+    "url": "reports/4b0bad99ce6093df6b20b8be9c0b937b5d085f73/index.html",
+    "status": "failure",
+    "duration": "0:01:07"
+  },
+  {
     "sha": "648e8c901b6c14888f3a268ce117155b4611d586",
     "message": "Add best practices documentation for Playwright test steps and implement reusable step patterns\n\nThis commit introduces a comprehensive guide on best practices for structuring test steps in Playwright, enhancing readability, maintainability, and debugging efficiency. It includes examples of step organization, naming conventions, and verification practices. Additionally, reusable step functions are implemented in the ProductSteps class to encapsulate common interactions with the Products page, promoting code reuse and clarity in test cases. The changes also include an index file for easier import of step classes.",
     "run_number": 31,
@@ -86,15 +96,6 @@
     "run_id": "14330695559",
     "timestamp": "2025-04-08T10:01:51.946370",
     "url": "reports/b5875830d7296447f603a80f29f10ad3b61358d8/index.html",
-    "status": "success"
-  },
-  {
-    "sha": "fdda337f1113e42194603c49a7bd6f045dc8f4ac",
-    "message": "Enhance report generation script: add visual history grid to HTML reports, improving the display of test results with interactive elements for better user experience. Include status indicators for each report and placeholders for missing data.",
-    "run_number": 20,
-    "run_id": "14330576887",
-    "timestamp": "2025-04-08T09:55:43.070028",
-    "url": "reports/fdda337f1113e42194603c49a7bd6f045dc8f4ac/index.html",
     "status": "success"
   }
 ]

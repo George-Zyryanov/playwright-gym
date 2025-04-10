@@ -23,7 +23,7 @@ test('Verify Products Page', createTestMetadata({
     await ProductSteps.verifyProductsPageLoaded(productsPage);
     
     // Search for product
-    const searchTerm = "Frozen Tops For Kids";
+    const searchTerm = "WRONG PRODUCT";
     await ProductSteps.searchForProduct(productsPage, searchTerm);
     
     // Verify search results

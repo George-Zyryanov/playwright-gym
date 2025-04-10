@@ -196,7 +196,7 @@
                                             <summary class="is-capitalized is-size-6">Chrome</summary>
                                             <ul class="mt-4 mb-4">
                                                 <li class="media " data-suite-name="Verify Products Page"
-                                                    data-test-duration="06s:657ms" data-test-tags="" 
+                                                    data-test-duration="05s:699ms" data-test-tags="" 
                                                     data-project-name="Chrome" data-test-id="0"
                                                     data-test-status="passed ">
                                                     <div class="icon-text">
@@ -265,7 +265,7 @@
                                             <span class="icon has-text-primary is-small mr-2">
                                                 <i class="fas fa-stopwatch" style="color: peachpuff;"></i>
                                             </span>
-                                            <span class="is-size-6">08s:460ms</span>
+                                            <span class="is-size-6">07s:125ms</span>
                                         </p>
                                         <p class="is-flex is-align-items-center mb-2">
                                             <span class="icon has-text-success is-small mr-2">
@@ -277,7 +277,7 @@
                                             <span class="icon has-text-info is-small mr-2">
                                                 <i class="fas fa-calendar-alt"></i>
                                             </span>
-                                            <span class="is-size-6">08-Apr-2025 9:49:08 AM</span>
+                                            <span class="is-size-6">10-Apr-2025 9:35:42 AM</span>
                                         </p>
                                     </div>
                                 </div>
@@ -317,7 +317,7 @@
   {
     "suiteTags": [],
     "testTags": [],
-    "location": "Products.test.ts:4:5",
+    "location": "Products.test.ts:6:5",
     "retry": "",
     "isRetry": 0,
     "projectName": "Chrome",
@@ -325,7 +325,7 @@
     "title": "Verify Products Page",
     "status": "passed",
     "flaky": "expected",
-    "duration": "06s:657ms",
+    "duration": "05s:699ms",
     "errors": [],
     "steps": [
       {
@@ -335,57 +335,22 @@
       },
       {
         "snippet": "",
-        "title": "page.goto(/)",
-        "location": ""
-      },
-      {
-        "snippet": "   at pageFactory/pageRepository/MainPage.ts:28\n\n  26 |\n  27 |         const isDialogVisible = await this.dialogWindowConsentButton\n> 28 |         .waitFor({state: 'visible', timeout: 3000})\n     |          ^\n  29 |         .then(()=> true)\n  30 |         .catch(() => false)\n  31 |",
-        "title": "locator.getByRole('button', { name: 'Consent' }).waitFor",
-        "location": "pageFactory/pageRepository/MainPage.ts:28:10"
-      },
-      {
-        "snippet": "",
-        "title": "locator.getByRole('link', { name: 'Products' }).click",
+        "title": "Navigate to products page",
         "location": ""
       },
       {
         "snippet": "",
-        "title": "expect.toBeTruthy",
+        "title": "Verify products page is loaded",
         "location": ""
       },
       {
         "snippet": "",
-        "title": "locator.getByRole('heading', { name: 'All Products' }).isVisible",
+        "title": "Search for product: \"Frozen Tops For Kids\"",
         "location": ""
       },
       {
         "snippet": "",
-        "title": "expect.toBeTruthy",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "locator.fill(input#search_product)",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "locator.click(button#submit_search)",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "locator.getByRole('heading', { name: 'Searched Products' }).isVisible",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "expect.toBeTruthy",
-        "location": ""
-      },
-      {
-        "snippet": "",
-        "title": "expect.toHaveCount",
+        "title": "Verify search results display correctly",
         "location": ""
       },
       {

@@ -189,6 +189,18 @@
             <!-- Visual History Grid -->
             <div class="history-grid">
                 
+                <a href="reports/648e8c901b6c14888f3a268ce117155b4611d586/index.html" class="history-square success">
+                    31
+                    <div class="history-tooltip">
+                        <div class="run-number">Run #31</div>
+                        <div class="commit-sha">648e8c9</div>
+                        <div class="timestamp">2025-04-10</div>
+                        
+                        <div class="duration">0:01:09</div>
+                        
+                    </div>
+                </a>
+                
                 <a href="reports/02d70bbc62d0f6d7f46751b81941d9930edd1f54/index.html" class="history-square success">
                     30
                     <div class="history-tooltip">
@@ -293,16 +305,6 @@
                     </div>
                 </a>
                 
-                <a href="reports/0eb3fd52cdd842ad2387ed20ea7f31eba00bd946/index.html" class="history-square success">
-                    19
-                    <div class="history-tooltip">
-                        <div class="run-number">Run #19</div>
-                        <div class="commit-sha">0eb3fd5</div>
-                        <div class="timestamp">2025-04-08</div>
-                        
-                    </div>
-                </a>
-                
                 
             </div>
             
@@ -317,11 +319,8 @@
                     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
                     <script>
                         // Prepare data for Chart.js
-                        const labels = ['Run #19', 'Run #20', 'Run #21', 'Run #23', 'Run #24', 'Run #26', 'Run #27', 'Run #28', 'Run #29', 'Run #30'];
+                        const labels = ['Run #20', 'Run #21', 'Run #23', 'Run #24', 'Run #26', 'Run #27', 'Run #28', 'Run #29', 'Run #30', 'Run #31'];
                         const durations = [
-                            
-                                
-                                0, 
                             
                                 
                                 0, 
@@ -340,6 +339,9 @@
                             
                                 
                                 7, 
+                            
+                                
+                                1, 
                             
                                 
                                 1, 
@@ -380,8 +382,6 @@
                             
                                 'Unknown', 
                             
-                                'Unknown', 
-                            
                                 '0:03:00', 
                             
                                 '0:01:50', 
@@ -394,12 +394,12 @@
                             
                                 '0:01:10', 
                             
-                                '0:01:05'
+                                '0:01:05', 
+                            
+                                '0:01:09'
                             
                         ];
                         const commitShas = [
-                            
-                                '0eb3fd5', 
                             
                                 'fdda337', 
                             
@@ -417,7 +417,9 @@
                             
                                 '5e9cab5', 
                             
-                                '02d70bb'
+                                '02d70bb', 
+                            
+                                '648e8c9'
                             
                         ];
                         
@@ -519,6 +521,21 @@
             </div>
             
             <!-- Existing Reports List -->
+            
+            <div class='report'>
+                <h2>
+                    <span class='status-indicator status-success'></span>
+                    <a href='reports/648e8c901b6c14888f3a268ce117155b4611d586/index.html'>Run #31</a>
+                </h2>
+                <div class='commit-message'>Add best practices documentation for Playwright test steps and implement reusable step patterns
+
+This commit introduces a comprehensive guide on best practices for structuring test steps in Playwright, enhancing readability, maintainability, and debugging efficiency. It includes examples of step organization, naming conventions, and verification practices. Additionally, reusable step functions are implemented in the ProductSteps class to encapsulate common interactions with the Products page, promoting code reuse and clarity in test cases. The changes also include an index file for easier import of step classes.</div>
+                <div class='timestamp'>2025-04-10 09:36:08</div>
+                <div>Commit: 648e8c9</div>
+                
+                <div class='duration'>Duration: 0:01:09</div>
+                
+            </div>
             
             <div class='report'>
                 <h2>
@@ -633,19 +650,8 @@
                 
             </div>
             
-            <div class='report'>
-                <h2>
-                    <span class='status-indicator status-success'></span>
-                    <a href='reports/0eb3fd52cdd842ad2387ed20ea7f31eba00bd946/index.html'>Run #19</a>
-                </h2>
-                <div class='commit-message'>Add GitHub Actions script for generating Playwright test reports: implement a dedicated Python script to create HTML reports, manage report history, and streamline report generation process. Update workflow to utilize the new script, ensuring proper environment variable handling and script execution.</div>
-                <div class='timestamp'>2025-04-08 09:49:37</div>
-                <div>Commit: 0eb3fd5</div>
-                
-            </div>
-            
             <footer>
-                Generated by GitHub Actions on 2025-04-09 16:51:12
+                Generated by GitHub Actions on 2025-04-10 09:36:08
             </footer>
         </div>
     </body>
